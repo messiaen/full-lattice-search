@@ -52,7 +52,9 @@ public class LatticeTokenFilter extends TokenFilter {
                 payAtt.setPayload(tokenParts.score);
                 termAtt.setLength(tokenParts.tokenLen);
 
-                if (tokenParts.pos == lastPos && !firstTok) {
+                if (firstTok) {
+                    posIncAtt.setPositionIncrement(1);
+                } else if (lastPos == tokenParts.pos) {
                     posIncAtt.setPositionIncrement(0);
                 } else {
                     posIncAtt.setPositionIncrement(1);
@@ -65,6 +67,14 @@ public class LatticeTokenFilter extends TokenFilter {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public void reset() throws IOException {
+        super.reset();
+        tokenParts.reset();
+        lastPos = 0;
+        firstTok = true;
     }
 
     private boolean splitToken(char[] token, int len) throws IOException {
@@ -100,5 +110,11 @@ public class LatticeTokenFilter extends TokenFilter {
         private int pos;
         private int tokenLen;
         private BytesRef score;
+
+        private void reset() {
+            pos = 0;
+            tokenLen = 0;
+            score = null;
+        }
     }
 }
