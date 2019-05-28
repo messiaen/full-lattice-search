@@ -24,7 +24,10 @@ import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.util.BytesRef;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.SortedMap;
 
 public class LatticeTokenFilter extends TokenFilter {
     public static final char DELIMITER = '|';
@@ -37,17 +40,27 @@ public class LatticeTokenFilter extends TokenFilter {
     private int lastPos;
     private boolean firstTok;
 
-    public LatticeTokenFilter(TokenStream input) {
+    private final ArrayList<Map.Entry<Float, Integer>> bucketEntries;
+    private int repeatTok;
+
+    public LatticeTokenFilter(TokenStream input, SortedMap<Float, Integer> buckets) {
         super(input);
         encoder = new FloatEncoder();
         tokenParts = new TokenParts();
         lastPos = 0;
         firstTok = true;
+        repeatTok = 0;
+
+        this.bucketEntries = new ArrayList<>(buckets.entrySet());
     }
 
     @Override
     public boolean incrementToken() throws IOException {
-        if (input.incrementToken()) {
+        if (repeatTok > 0) {
+            posIncAtt.setPositionIncrement(0);
+            repeatTok--;
+            return true;
+        } else if (input.incrementToken()) {
             if (splitToken(termAtt.buffer(), termAtt.length())) {
                 payAtt.setPayload(tokenParts.score);
                 termAtt.setLength(tokenParts.tokenLen);
@@ -62,6 +75,8 @@ public class LatticeTokenFilter extends TokenFilter {
 
                 lastPos = tokenParts.pos;
                 firstTok = false;
+
+                repeatTok = tokRepeats(tokenParts.scoreValue) - 1;
             }
             return true;
         } else {
@@ -75,6 +90,16 @@ public class LatticeTokenFilter extends TokenFilter {
         tokenParts.reset();
         lastPos = 0;
         firstTok = true;
+        repeatTok = 0;
+    }
+
+    private int tokRepeats(float score) {
+        for (Map.Entry<Float, Integer> e : bucketEntries) {
+            if (score >= e.getKey()) {
+                return e.getValue();
+            }
+        }
+        return 1;
     }
 
     private boolean splitToken(char[] token, int len) throws IOException {
@@ -84,6 +109,7 @@ public class LatticeTokenFilter extends TokenFilter {
         }
         tokenParts.tokenLen = delimiterLocs[0];
         tokenParts.pos = Integer.parseInt(String.valueOf(Arrays.copyOfRange(token, delimiterLocs[0]+1, delimiterLocs[1])));
+        tokenParts.scoreValue = Float.parseFloat(String.copyValueOf(Arrays.copyOfRange(token, delimiterLocs[1]+1 , len)));
         tokenParts.score = encoder.encode(token, delimiterLocs[1]+1, len - (delimiterLocs[1]+1));
         return true;
     }
@@ -110,11 +136,13 @@ public class LatticeTokenFilter extends TokenFilter {
         private int pos;
         private int tokenLen;
         private BytesRef score;
+        private Float scoreValue;
 
         private void reset() {
             pos = 0;
             tokenLen = 0;
             score = null;
+            scoreValue = null;
         }
     }
 }
