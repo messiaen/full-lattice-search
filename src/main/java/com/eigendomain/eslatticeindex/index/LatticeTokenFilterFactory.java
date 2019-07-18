@@ -24,16 +24,18 @@ import java.util.*;
 
 public class LatticeTokenFilterFactory extends AbstractTokenFilterFactory {
     private SortedMap<Float, Integer> buckets;
+    private int numExtraFields;
 
     public LatticeTokenFilterFactory(IndexSettings indexSettings, Environment env, String name, Settings settings) {
         super(indexSettings, name, settings);
         this.buckets = parseBucketList(settings.getAsList("score_buckets"));
+        this.numExtraFields = settings.getAsInt("num_extra_fields", 0);
     }
 
 
     @Override
     public LatticeTokenFilter create(TokenStream input) {
-        return new LatticeTokenFilter(input, this.buckets);
+        return new LatticeTokenFilter(input, this.buckets, this.numExtraFields);
     }
 
     private SortedMap<Float, Integer> parseBucketList(List<String> bucketsStrings) {

@@ -32,6 +32,7 @@ import java.util.SortedMap;
 public class LatticeTokenFilter extends TokenFilter {
     public static final char DELIMITER = '|';
     public static final char NUM_FIELDS = 3;
+    private final int numFields;
     private final PayloadEncoder encoder;
     private final PayloadAttribute payAtt = addAttribute(PayloadAttribute.class);
     private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
@@ -43,7 +44,7 @@ public class LatticeTokenFilter extends TokenFilter {
     private final ArrayList<Map.Entry<Float, Integer>> bucketEntries;
     private int repeatTok;
 
-    public LatticeTokenFilter(TokenStream input, SortedMap<Float, Integer> buckets) {
+    public LatticeTokenFilter(TokenStream input, SortedMap<Float, Integer> buckets, int numExtraFields) {
         super(input);
         encoder = new FloatEncoder();
         tokenParts = new TokenParts();
@@ -52,6 +53,7 @@ public class LatticeTokenFilter extends TokenFilter {
         repeatTok = 0;
 
         this.bucketEntries = new ArrayList<>(buckets.entrySet());
+        this.numFields = NUM_FIELDS + numExtraFields;
     }
 
     @Override
@@ -115,20 +117,19 @@ public class LatticeTokenFilter extends TokenFilter {
     }
 
     private int[] findDelimiters(char[] token, int len) throws IOException {
-        final int[] locs = new int[NUM_FIELDS-1];
+        final int[] locs = new int[numFields-1];
         int i = 0;
-        for (int j = 0; j < len && i < NUM_FIELDS-1; j++) {
+        for (int j = 0; j < len && i < numFields-1; j++) {
             if (DELIMITER == token[j]) {
-               locs[i++] = j;
+                locs[i++] = j;
             }
         }
-        switch (i) {
-            case 0:
-                return null;
-            case NUM_FIELDS-1:
-                return locs;
-            default:
-                throw new IOException("Failed to parse token");
+        if (i == 0) {
+            return null;
+        } else if (i == numFields-1) {
+            return locs;
+        } else {
+            throw new IOException("Failed to parse token");
         }
     }
 
