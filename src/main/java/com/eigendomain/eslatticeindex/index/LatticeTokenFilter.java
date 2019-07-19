@@ -109,10 +109,13 @@ public class LatticeTokenFilter extends TokenFilter {
         if (delimiterLocs == null) {
             return false;
         }
+
+        int scoreEnd = delimiterLocs.length > NUM_FIELDS - 1 ? delimiterLocs[2] : len;
+
         tokenParts.tokenLen = delimiterLocs[0];
         tokenParts.pos = Integer.parseInt(String.valueOf(Arrays.copyOfRange(token, delimiterLocs[0]+1, delimiterLocs[1])));
-        tokenParts.scoreValue = Float.parseFloat(String.copyValueOf(Arrays.copyOfRange(token, delimiterLocs[1]+1 , len)));
-        tokenParts.score = encoder.encode(token, delimiterLocs[1]+1, len - (delimiterLocs[1]+1));
+        tokenParts.scoreValue = Float.parseFloat(String.copyValueOf(Arrays.copyOfRange(token, delimiterLocs[1]+1 , scoreEnd)));
+        tokenParts.score = encoder.encode(token, delimiterLocs[1]+1, scoreEnd - (delimiterLocs[1]+1));
         return true;
     }
 
