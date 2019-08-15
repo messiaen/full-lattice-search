@@ -24,7 +24,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath "org.elasticsearch.gradle:build-tools:${rootProject.file('VERSION.txt').text.trim()}"
+        classpath "org.elasticsearch.gradle:build-tools:${elasticsearchVersion}"
     }
 }
 
@@ -34,13 +34,12 @@ apply plugin: 'elasticsearch.esplugin'
 licenseFile = rootProject.file('LICENSE.txt')
 noticeFile = rootProject.file('NOTICE.txt')
 
-version = rootProject.file('VERSION.txt').text.trim()
+version = "${rootProject.file('VERSION.txt').text.trim()}-${elasticsearchVersion}"
 
 esplugin {
   description 'Plugin that allows indexing of tokens at specific positions with confidence payload'
   classname 'com.eigendomain.eslatticeindex.plugin.LatticeIndexPlugin'
   name project.name
-  version project.version
   licenseFile rootProject.file('LICENSE.txt')
   noticeFile rootProject.file('NOTICE.txt')
 }
