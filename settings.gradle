@@ -1,0 +1,2 @@
+rootProject.name = 'es-lattice-index-plugin'
+include ':rest-api-spec'
