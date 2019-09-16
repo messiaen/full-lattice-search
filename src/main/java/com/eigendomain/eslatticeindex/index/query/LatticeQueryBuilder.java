@@ -6,7 +6,7 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.analysis.tokenattributes.TermToBytesRefAttribute;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.queries.payloads.*;
+import org.apache.lucene.queries.payloads.PayloadDecoder;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.spans.SpanNearQuery;
 import org.apache.lucene.search.spans.SpanQuery;
@@ -19,7 +19,13 @@ import org.elasticsearch.common.lucene.Lucene;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentParser;
 import org.elasticsearch.index.mapper.MappedFieldType;
-import org.elasticsearch.index.query.*;
+import org.elasticsearch.index.query.AbstractQueryBuilder;
+import org.elasticsearch.index.query.MatchPhraseQueryBuilder;
+import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.QueryShardContext;
+import org.elasticsearch.index.query.QueryShardException;
+import org.elasticsearch.index.query.SpanNearQueryBuilder;
+import org.elasticsearch.index.query.SpanQueryBuilder;
 import org.elasticsearch.index.search.MatchQuery;
 
 import java.io.IOException;
@@ -36,7 +42,7 @@ public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilde
     private final Object value;
 
     private String analyzerString = null;
-    private String payloadFuncString = "sum";
+    private String payloadFuncString = "default";
     private String payloadDecoderString = "float";
     private float payloadScale = 1.0f;
     private boolean includeSpanScore = true;
@@ -45,7 +51,7 @@ public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilde
 
     private MatchQuery.ZeroTermsQuery zeroTermsQuery = MatchQuery.DEFAULT_ZERO_TERMS_QUERY;
 
-    private PayloadFunction payloadFunction = new SumPayloadFunction();
+    private LatticePayloadScoreFuction payloadFunction = new DefaultLatticePayloadFunction();
     private PayloadDecoder payloadDecoder = PayloadDecoder.FLOAT_DECODER;
 
     private static final ParseField SLOP_FIELD = new ParseField("slop");
@@ -75,29 +81,16 @@ public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilde
         this.analyzerString = in.readOptionalString();
     }
 
-    private static PayloadFunction parsePayloadFuncString(String name) {
+    private static LatticePayloadScoreFuction parsePayloadFuncString(String name) {
         switch(name) {
-            case "sum":
-                return new SumPayloadFunction();
-            case "max":
-                return new MaxPayloadFunction();
-            case "min":
-                return new MinPayloadFunction();
-            case "average":
-                return new AveragePayloadFunction();
-            case "lattice":
-                return new LatticePayloadFunction();
-            case "denorm_lattice":
-                return new LatticePayloadFunction(false, false);
-            case "normprob_lattice":
-                return new LatticePayloadFunction(false, true);
+            case "default":
+                return new DefaultLatticePayloadFunction();
         }
         throw new IllegalArgumentException("Invalid payload function: " + name);
     }
 
     private static PayloadDecoder parseDecoder(String name, float payloadScale) {
         if ("float".equals(name)) {
-            //return PayloadDecoder.FLOAT_DECODER;
             return new FloatDecoder(payloadScale);
         }
             throw new IllegalArgumentException("Invalid decoder: " + name);
@@ -125,12 +118,12 @@ public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilde
         return this;
     }
 
-    public LatticeQueryBuilder payloadFunction(PayloadFunction f) {
+    public LatticeQueryBuilder payloadFunction(LatticePayloadScoreFuction f) {
         this.payloadFunction = f;
         return this;
     }
 
-    public PayloadFunction payloadFunction() {
+    public LatticePayloadScoreFuction payloadFunction() {
         return this.payloadFunction;
     }
 
@@ -281,7 +274,7 @@ public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilde
         }
 
         if (termQueries.size() == 1) {
-           return new PayloadScoreQuery(
+           return new LatticePayloadScoreQuery(
                    termQueries.get(0),
                    this.payloadFunction,
                    this.payloadDecoder,
@@ -292,7 +285,7 @@ public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilde
             builder.addClause(tq);
         }
         final SpanQuery spanQuery = builder.build();
-        return new PayloadScoreQuery(spanQuery, this.payloadFunction, this.payloadDecoder, this.includeSpanScore);
+        return new LatticePayloadScoreQuery(spanQuery, this.payloadFunction, this.payloadDecoder, this.includeSpanScore);
     }
 
     @Override
@@ -322,7 +315,7 @@ public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilde
         int slop = SpanNearQueryBuilder.DEFAULT_SLOP;
         boolean inOrder = SpanNearQueryBuilder.DEFAULT_IN_ORDER;
         boolean includeSpanScore = true;
-        String payloadFunc = "sum";
+        String payloadFunc = "default";
         String payloadDecoder = "float";
         float payloadScale = 1.0f;
         String fieldName = null;
