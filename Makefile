@@ -1,6 +1,9 @@
 VERSION = $(shell cat VERSION.txt)
 NAME = "messiaen/elasticsearch-plug-ph-lat"
 
+clean:
+	./gradlew clean
+
 default: build_plugin
 
 build_plugin:
@@ -8,12 +11,19 @@ build_plugin:
 
 build_image: build_plugin
 	docker build --no-cache -t $(NAME):$(VERSION) .
+	docker tag $(NAME):$(VERSION) $(NAME):latest
 
 push:
 	docker push $(NAME):$(VERSION)
 
 test:
-	./gradlew test
+	./gradlew cleanTest test
 
 build:
 	./gradlew build
+
+run: stop build_image
+	docker-compose up -d
+
+stop:
+	docker-compose down --volumes
