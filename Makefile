@@ -1,6 +1,9 @@
 VERSION = $(shell cat VERSION.txt)
 NAME = "messiaen/elasticsearch-plug-ph-lat"
 
+clean:
+	./gradlew clean
+
 default: build_plugin
 
 build_plugin:

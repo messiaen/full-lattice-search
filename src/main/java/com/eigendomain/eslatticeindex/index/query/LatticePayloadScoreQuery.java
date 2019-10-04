@@ -271,7 +271,11 @@ public class LatticePayloadScoreQuery extends SpanQuery {
         }
 
         protected float getPayloadScore() {
-            return function.docScore(docID(), getField(), spans.numSpansSeen, spans.payloadScore);
+            float score = function.docScore(docID(), getField(), spans.numSpansSeen, spans.payloadScore);
+            if (score < 0) {
+                return 0;
+            }
+            return score;
         }
 
         /*
