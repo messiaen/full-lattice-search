@@ -243,7 +243,7 @@ public class LatticePayloadScoreQuery extends SpanQuery {
             in.collect(this);
             System.out.println("span=" + in + "; width=" + in.width());
             if (in.startPosition() != Spans.NO_MORE_POSITIONS) {
-                payloadScore = function.currentSpanScore(docID(), getField(), in.startPosition(), in.endPosition(),
+                payloadScore = function.spanScore(docID(), getField(), in.startPosition(), in.endPosition(),
                         in.width(), payloadsSeen, payloadScore, currentSpanScore);
                 numSpansSeen++;
             }

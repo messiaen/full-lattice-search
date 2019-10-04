@@ -24,6 +24,7 @@ buildscript {
         jcenter()
     }
     dependencies {
+
         classpath "org.elasticsearch.gradle:build-tools:${elasticsearchVersion}"
     }
 }
@@ -36,6 +37,7 @@ configurations.all {
 
 apply plugin: 'idea'
 apply plugin: 'elasticsearch.esplugin'
+apply plugin: 'java'
 
 licenseFile = rootProject.file('LICENSE.txt')
 noticeFile = rootProject.file('NOTICE.txt')
@@ -49,15 +51,13 @@ esplugin {
   name project.name
   licenseFile rootProject.file('LICENSE.txt')
   noticeFile rootProject.file('NOTICE.txt')
+
+
+  dependencies {
+    testCompile group: 'org.elasticsearch.test', name: 'framework', version: "${elasticsearchVersion}"
+ }
 }
 
 
-//unitTest.enabled = false
-test.enabled = false
+test.enabled = true
 integTest.enabled = false
-
-dependencies {
-}
-
-dependencyLicenses {
-}

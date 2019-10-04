@@ -1,6 +1,6 @@
-FROM docker.elastic.co/elasticsearch/elasticsearch:6.5.1
+FROM docker.elastic.co/elasticsearch/elasticsearch:7.3.0
 
-COPY build/distributions/es-lattice-index-plugin-6.5.1.zip /es-lattice-index-plugin-6.5.1.zip
+COPY build/distributions/es-lattice-index-plugin-2.0.0-7.3.0.zip /es-lattice-index-plugin.zip
 
 RUN bin/elasticsearch-plugin install analysis-phonetic
-RUN bin/elasticsearch-plugin install file:///es-lattice-index-plugin-6.5.1.zip && rm -f /es-lattice-index-plugin-6.5.1.zip
+RUN bin/elasticsearch-plugin install file:///es-lattice-index-plugin.zip && rm -f /es-lattice-index-plugin.zip
