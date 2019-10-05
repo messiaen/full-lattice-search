@@ -1,5 +1,5 @@
 VERSION = $(shell cat VERSION.txt)
-NAME = "messiaen/elasticsearch-plug-ph-lat"
+NAME = "registry.gitlab.com/hedgehogai/full-lattice-search/full-lattice-search"
 
 clean:
 	./gradlew clean

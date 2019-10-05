@@ -1,2 +1,2 @@
-rootProject.name = 'es-lattice-index-plugin'
+rootProject.name = 'full-lattice-search'
 include ':rest-api-spec'
