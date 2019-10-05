@@ -15,6 +15,7 @@ build_image: build_plugin
 
 push:
 	docker push $(NAME):$(VERSION)
+	docker push $(NAME):latest
 
 test:
 	./gradlew cleanTest test
