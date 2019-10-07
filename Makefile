@@ -1,12 +1,16 @@
+# Disable built-in rules and variables
+MAKEFLAGS += --no-builtin-rules
+MAKEFLAGS += --no-builtin-variables
+
 ES_VERSION = $(shell grep elasticsearchVersion gradle.properties  | cut -d " " -f 3)
 VERSION = $(shell cat VERSION.txt)
 NAME = "registry.gitlab.com/hedgehogai/full-lattice-search/full-lattice-search"
 IMAGE_VERSION = $(VERSION)-$(ES_VERSION)
 
+default: build_plugin
+
 clean:
 	./gradlew clean
-
-default: build_plugin
 
 build_plugin:
 	./gradlew clean assemble
