@@ -16,7 +16,7 @@ build_plugin:
 	./gradlew clean assemble
 
 build_image: build_plugin
-	docker build --no-cache -t $(NAME):$(IMAGE_VERSION) .
+	docker build --no-cache --build-arg VERSION=$(IMAGE_VERSION) -t $(NAME):$(IMAGE_VERSION) .
 	docker tag $(NAME):$(IMAGE_VERSION) $(NAME):latest
 
 push:
