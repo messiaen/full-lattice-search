@@ -169,6 +169,7 @@ public class LatticePayloadScoreQuery extends SpanQuery {
             return innerWeight.isCacheable(ctx);
         }
 
+        // TODO remove this method
         @Override
         public void extractTerms(Set<Term> terms) {
             innerWeight.extractTerms(terms);

@@ -54,7 +54,7 @@ import java.util.Objects;
 import static org.elasticsearch.common.lucene.search.Queries.newUnmappedFieldQuery;
 
 public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilder> implements SpanQueryBuilder {
-    public static final String NAME = "match_lattice_phrase";
+    public static final String NAME = "match_lattice";
 
     public static final int DEFAULT_SLOP = MatchQuery.DEFAULT_PHRASE_SLOP;
     public static final float DEFAULT_SLOP_SECS = 3.0f;

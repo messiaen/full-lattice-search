@@ -24,18 +24,42 @@ import java.util.*;
 
 public class LatticeTokenFilterFactory extends AbstractTokenFilterFactory {
     private SortedMap<Float, Integer> buckets;
-    private int numExtraFields;
+
+    private final String latticeFormat;
+    private final float audioSecondsPositionIncrementInterval;
+    // TODO
+    // private final int imagePixelPositionIncrementInterval;
+    private final String fieldDelimiter;
 
     public LatticeTokenFilterFactory(IndexSettings indexSettings, Environment env, String name, Settings settings) {
         super(indexSettings, name, settings);
         this.buckets = parseBucketList(settings.getAsList("score_buckets"));
-        this.numExtraFields = settings.getAsInt("num_extra_fields", 0);
+        this.fieldDelimiter = settings.get("field_delimiter", "|");
+        this.latticeFormat = settings.get("lattice_format", "lattice");
+        this.audioSecondsPositionIncrementInterval = settings.getAsFloat("audio_position_increment_seconds", 0.01f);
     }
 
-
     @Override
-    public LatticeTokenFilter create(TokenStream input) {
-        return new LatticeTokenFilter(input, this.buckets, this.numExtraFields);
+    public LatticeTokenFilter<?> create(TokenStream input) {
+        if (this.fieldDelimiter.length() != 1) {
+            throw new IllegalArgumentException("'field_delimiter' must be a single character");
+        }
+        char delim = this.fieldDelimiter.toCharArray()[0];
+
+        return new LatticeTokenFilter<>(input, this.buckets, delim, getLatticeTokenPartsFactory());
+    }
+
+    private LatticeTokenPartsFactory<?> getLatticeTokenPartsFactory() {
+        String format = this.latticeFormat.toLowerCase();
+        switch (format) {
+            case "lattice":
+                System.out.println("Creating lattice format");
+                return new BaseLatticeTokenParts.Factory();
+            case "audio":
+                System.out.println("Creating audio format");
+                return new AudioLatticeTokenParts.Factory(this.audioSecondsPositionIncrementInterval);
+        }
+        throw new IllegalArgumentException("Invalid lattice format '" + latticeFormat + "'");
     }
 
     private SortedMap<Float, Integer> parseBucketList(List<String> bucketsStrings) {

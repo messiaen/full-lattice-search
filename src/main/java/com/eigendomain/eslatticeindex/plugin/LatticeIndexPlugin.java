@@ -20,6 +20,7 @@ import com.eigendomain.eslatticeindex.index.query.LatticeQueryBuilder;
 import org.elasticsearch.index.analysis.TokenFilterFactory;
 import org.elasticsearch.indices.analysis.AnalysisModule.AnalysisProvider;
 import org.elasticsearch.plugins.AnalysisPlugin;
+import org.elasticsearch.plugins.MapperPlugin;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.plugins.SearchPlugin;
 
@@ -30,7 +31,7 @@ import java.util.HashMap;
 import static java.util.Collections.singletonList;
 
 
-public class LatticeIndexPlugin extends Plugin implements AnalysisPlugin, SearchPlugin {
+public class LatticeIndexPlugin extends Plugin implements AnalysisPlugin, SearchPlugin, MapperPlugin {
     @Override
     public Map<String, AnalysisProvider<TokenFilterFactory>> getTokenFilters() {
         return new HashMap<String, AnalysisProvider<TokenFilterFactory>>(){{

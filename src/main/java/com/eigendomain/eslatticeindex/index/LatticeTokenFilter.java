@@ -16,44 +16,44 @@ package com.eigendomain.eslatticeindex.index;
 
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.payloads.FloatEncoder;
-import org.apache.lucene.analysis.payloads.PayloadEncoder;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.PayloadAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
-import org.apache.lucene.util.BytesRef;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.SortedMap;
 
-public class LatticeTokenFilter extends TokenFilter {
-    public static final char DELIMITER = '|';
-    public static final char NUM_FIELDS = 3;
-    private final int numFields;
-    private final PayloadEncoder encoder;
+public class LatticeTokenFilter<T extends LatticeTokenParts<T>> extends TokenFilter {
+    private final char delimiter;
     private final PayloadAttribute payAtt = addAttribute(PayloadAttribute.class);
     private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
     private final PositionIncrementAttribute posIncAtt = addAttribute(PositionIncrementAttribute.class);
-    private final TokenParts tokenParts;
-    private int lastPos;
+
+    private final LatticeTokenPartsFactory<T> tokenPartsFactory;
+
+    private T currTokParts;
+    private T lastTokParts;
+    private T tmpTok;
     private boolean firstTok;
 
     private final ArrayList<Map.Entry<Float, Integer>> bucketEntries;
     private int repeatTok;
 
-    public LatticeTokenFilter(TokenStream input, SortedMap<Float, Integer> buckets, int numExtraFields) {
+    public LatticeTokenFilter(TokenStream input, SortedMap<Float, Integer> buckets, char fieldDelimiter, LatticeTokenPartsFactory<T> tokenPartsFactory) {
         super(input);
-        encoder = new FloatEncoder();
-        tokenParts = new TokenParts();
-        lastPos = 0;
+        this.tokenPartsFactory = tokenPartsFactory;
+
+        currTokParts = this.tokenPartsFactory.create(fieldDelimiter);
+        lastTokParts = this.tokenPartsFactory.create(fieldDelimiter);
+        tmpTok = null;
         firstTok = true;
         repeatTok = 0;
 
+        delimiter = fieldDelimiter;
+
         this.bucketEntries = new ArrayList<>(buckets.entrySet());
-        this.numFields = NUM_FIELDS + numExtraFields;
     }
 
     @Override
@@ -63,22 +63,24 @@ public class LatticeTokenFilter extends TokenFilter {
             repeatTok--;
             return true;
         } else if (input.incrementToken()) {
-            if (splitToken(termAtt.buffer(), termAtt.length())) {
-                payAtt.setPayload(tokenParts.score);
-                termAtt.setLength(tokenParts.tokenLen);
+            if (currTokParts.parseToken(termAtt.buffer(), termAtt.length())) {
+                payAtt.setPayload(currTokParts.encodedScore());
+                termAtt.setLength(currTokParts.tokenLen());
 
                 if (firstTok) {
                     posIncAtt.setPositionIncrement(1);
-                } else if (lastPos == tokenParts.pos) {
-                    posIncAtt.setPositionIncrement(0);
                 } else {
-                    posIncAtt.setPositionIncrement(1);
+                   int increment = currTokParts.positionIncrement(lastTokParts);
+                   posIncAtt.setPositionIncrement(increment);
                 }
 
-                lastPos = tokenParts.pos;
                 firstTok = false;
+                repeatTok = tokRepeats(currTokParts.score()) - 1;
 
-                repeatTok = tokRepeats(tokenParts.scoreValue) - 1;
+                tmpTok = lastTokParts;
+                lastTokParts = currTokParts;
+                currTokParts = tmpTok;
+                currTokParts.reset();
             }
             return true;
         } else {
@@ -89,8 +91,10 @@ public class LatticeTokenFilter extends TokenFilter {
     @Override
     public void reset() throws IOException {
         super.reset();
-        tokenParts.reset();
-        lastPos = 0;
+        currTokParts.reset();
+        lastTokParts.reset();
+        tmpTok = null;
+
         firstTok = true;
         repeatTok = 0;
     }
@@ -102,51 +106,5 @@ public class LatticeTokenFilter extends TokenFilter {
             }
         }
         return 1;
-    }
-
-    private boolean splitToken(char[] token, int len) throws IOException {
-        final int[] delimiterLocs = findDelimiters(token, len);
-        if (delimiterLocs == null) {
-            return false;
-        }
-
-        int scoreEnd = delimiterLocs.length > NUM_FIELDS - 1 ? delimiterLocs[2] : len;
-
-        tokenParts.tokenLen = delimiterLocs[0];
-        tokenParts.pos = Integer.parseInt(String.valueOf(Arrays.copyOfRange(token, delimiterLocs[0]+1, delimiterLocs[1])));
-        tokenParts.scoreValue = Float.parseFloat(String.copyValueOf(Arrays.copyOfRange(token, delimiterLocs[1]+1 , scoreEnd)));
-        tokenParts.score = encoder.encode(token, delimiterLocs[1]+1, scoreEnd - (delimiterLocs[1]+1));
-        return true;
-    }
-
-    private int[] findDelimiters(char[] token, int len) throws IOException {
-        final int[] locs = new int[numFields-1];
-        int i = 0;
-        for (int j = 0; j < len && i < numFields-1; j++) {
-            if (DELIMITER == token[j]) {
-                locs[i++] = j;
-            }
-        }
-        if (i == 0) {
-            return null;
-        } else if (i == numFields-1) {
-            return locs;
-        } else {
-            throw new IOException("Failed to parse token");
-        }
-    }
-
-    private class TokenParts {
-        private int pos;
-        private int tokenLen;
-        private BytesRef score;
-        private Float scoreValue;
-
-        private void reset() {
-            pos = 0;
-            tokenLen = 0;
-            score = null;
-            scoreValue = null;
-        }
     }
 }
