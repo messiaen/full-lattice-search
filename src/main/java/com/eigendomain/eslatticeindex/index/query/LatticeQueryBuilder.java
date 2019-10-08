@@ -17,6 +17,7 @@
 
 package com.eigendomain.eslatticeindex.index.query;
 
+import com.eigendomain.eslatticeindex.mapper.LatticeFieldMapper;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.CachingTokenFilter;
 import org.apache.lucene.analysis.TokenStream;
@@ -250,6 +251,11 @@ public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilde
         final MappedFieldType fieldType = context.fieldMapper(fieldName);
         if (fieldType == null) {
             return newUnmappedFieldQuery(fieldName);
+        }
+
+        if (fieldType instanceof LatticeFieldMapper.LatticeFieldType) {
+            LatticeFieldMapper.LatticeFieldType latFieldType = (LatticeFieldMapper.LatticeFieldType) fieldType;
+            System.out.printf("fieldType.name=%s; fieldType.inc=%f; fieldType.format=%s\n", latFieldType.typeName(), latFieldType.audioPositionIncrementSeconds(), latFieldType.latticeFormat());
         }
 
         if (analyzer == null) {

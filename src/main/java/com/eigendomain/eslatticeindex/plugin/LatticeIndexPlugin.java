@@ -17,13 +17,16 @@ package com.eigendomain.eslatticeindex.plugin;
 
 import com.eigendomain.eslatticeindex.index.LatticeTokenFilterFactory;
 import com.eigendomain.eslatticeindex.index.query.LatticeQueryBuilder;
+import com.eigendomain.eslatticeindex.mapper.LatticeFieldMapper;
 import org.elasticsearch.index.analysis.TokenFilterFactory;
+import org.elasticsearch.index.mapper.Mapper;
 import org.elasticsearch.indices.analysis.AnalysisModule.AnalysisProvider;
 import org.elasticsearch.plugins.AnalysisPlugin;
 import org.elasticsearch.plugins.MapperPlugin;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.plugins.SearchPlugin;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -47,5 +50,10 @@ public class LatticeIndexPlugin extends Plugin implements AnalysisPlugin, Search
                         LatticeQueryBuilder::new,
                         LatticeQueryBuilder::fromXContent)
         );
+    }
+
+    @Override
+    public Map<String, Mapper.TypeParser> getMappers() {
+        return Collections.singletonMap(LatticeFieldMapper.CONTENT_TYPE, new LatticeFieldMapper.TypeParser());
     }
 }
