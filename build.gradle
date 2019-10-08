@@ -19,12 +19,30 @@
 
 
 buildscript {
+    ext {
+      // could be cleaned up but I don't groovy
+      getEnvKey = { key ->
+          //println("Called getEnvKey with ${key}")
+          ret = "null"
+          rootProject.file('.env').eachLine { line ->
+              def (name, reference) = line.split('=')
+              if (key.equals(name)) {
+                //println("found key with ${reference}")
+                ret = reference
+              }
+          }
+          //println("returning ${ret}")
+          return ret
+      }
+      testone = 
+      elasticsearchVersion = getEnvKey("ES_VERSION")
+      pluginVersion = getEnvKey("PLUGIN_VERSION")
+    }
     repositories {
         mavenCentral()
         jcenter()
     }
     dependencies {
-
         classpath "org.elasticsearch.gradle:build-tools:${elasticsearchVersion}"
     }
 }
@@ -42,8 +60,7 @@ apply plugin: 'java'
 licenseFile = rootProject.file('LICENSE.txt')
 noticeFile = rootProject.file('NOTICE.txt')
 
-version = "${rootProject.file('VERSION.txt').text.trim()}-${elasticsearchVersion}"
-
+version = "${pluginVersion}-${elasticsearchVersion}"
 
 esplugin {
   description 'Plugin that allows indexing of tokens at specific positions with confidence payload'
@@ -57,7 +74,6 @@ esplugin {
     testCompile group: 'org.elasticsearch.test', name: 'framework', version: "${elasticsearchVersion}"
  }
 }
-
 
 test.enabled = true
 integTest.enabled = false
