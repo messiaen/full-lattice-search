@@ -177,9 +177,11 @@ public class LatticeFieldMapper extends FieldMapper {
                 } else if (propName.equals("lattice_format")) {
                     String format = XContentMapValues.nodeStringValue(propNode, "lattice");
                     builder.latticeFormat(format);
+                    iterator.remove();
                 } else if (propName.equals("audio_position_increment_seconds")) {
                     float secs = XContentMapValues.nodeFloatValue(propNode, 0.01f);
                     builder.audioPositionIncrementSeconds(secs);
+                    iterator.remove();
                 }
             }
             return builder;

@@ -70,6 +70,7 @@ public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilde
     private boolean includeSpanScore = true;
     private boolean inOrder = true;
     private int slop = DEFAULT_SLOP;
+    private float slopSeconds = DEFAULT_SLOP_SECS;
 
     private MatchQuery.ZeroTermsQuery zeroTermsQuery = MatchQuery.DEFAULT_ZERO_TERMS_QUERY;
 
@@ -77,6 +78,7 @@ public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilde
     private PayloadDecoder payloadDecoder = PayloadDecoder.FLOAT_DECODER;
 
     private static final ParseField SLOP_FIELD = new ParseField("slop");
+    private static final ParseField SLOP_SECS_FIELD = new ParseField("slop_seconds");
     private static final ParseField IN_ORDER_FIELD = new ParseField("in_order");
     private static final ParseField INCLUDE_SPAN_SCORE_FIELD = new ParseField("include_span_score");
     private static final ParseField PAYLOAD_FUNCTION_FIELD = new ParseField("payload_function");
@@ -177,6 +179,15 @@ public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilde
         return this;
     }
 
+    public LatticeQueryBuilder slopSeconds(float secs) {
+        this.slopSeconds = secs;
+        return this;
+    }
+
+    public float slopSeconds() {
+        return slopSeconds;
+    }
+
     public LatticeQueryBuilder payloadDecoderString(String payloadDecoderString) {
         this.payloadDecoderString = payloadDecoderString;
         return this;
@@ -270,7 +281,19 @@ public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilde
         }
 
         SpanNearQuery.Builder builder =  new SpanNearQuery.Builder(fieldName, inOrder);
-        builder.setSlop(slop);
+        if (fieldType instanceof LatticeFieldMapper.LatticeFieldType) {
+            LatticeFieldMapper.LatticeFieldType latFieldType = (LatticeFieldMapper.LatticeFieldType) fieldType;
+            if (latFieldType.latticeFormat().equals(LatticeFieldMapper.FORMAT_AUDIO)) {
+                //System.out.println("incsecs: " + latFieldType.audioPositionIncrementSeconds());
+                int s = secsToSlop(latFieldType.audioPositionIncrementSeconds());
+                //System.out.println("slop: " + s);
+                builder.setSlop(s);
+            } else {
+                builder.setSlop(slop);
+            }
+        } else {
+            builder.setSlop(slop);
+        }
 
         List<SpanTermQuery> termQueries = new ArrayList<>();
 
@@ -310,12 +333,17 @@ public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilde
         return new LatticePayloadScoreQuery(spanQuery, this.payloadFunction, this.payloadDecoder, this.includeSpanScore);
     }
 
+    private int secsToSlop(float posIncSecs) {
+        return (int)Math.ceil(this.slopSeconds / posIncSecs);
+    }
+
     @Override
     protected boolean doEquals(LatticeQueryBuilder other) {
         return Objects.equals(fieldName, other.fieldName)
                 && Objects.equals(value, other.value)
                 && Objects.equals(analyzerString, other.analyzerString)
                 && Objects.equals(slop, other.slop)
+                && Objects.equals(slopSeconds, other.slopSeconds)
                 && Objects.equals(zeroTermsQuery, other.zeroTermsQuery)
                 && Objects.equals(inOrder, other.inOrder)
                 && Objects.equals(includeSpanScore, other.includeSpanScore)
@@ -325,7 +353,8 @@ public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilde
 
     @Override
     protected int doHashCode() {
-        return Objects.hash(fieldName, analyzerString, value, slop, includeSpanScore, inOrder, payloadDecoder, payloadFunction);
+        return Objects.hash(fieldName, analyzerString, value, slop, slopSeconds,
+                includeSpanScore, inOrder, payloadDecoder, payloadFunction);
     }
 
     public static LatticeQueryBuilder fromXContent(XContentParser parser) throws IOException {
@@ -364,6 +393,8 @@ public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilde
                             boost = parser.floatValue();
                         } else if (SLOP_FIELD.match(currentFieldName, parser.getDeprecationHandler())) {
                             slop = parser.intValue();
+                        } else if (SLOP_SECS_FIELD.match(currentFieldName, parser.getDeprecationHandler())) {
+                            slopSeconds = parser.floatValue();
                         } else if (AbstractQueryBuilder.NAME_FIELD.match(currentFieldName, parser.getDeprecationHandler())) {
                             queryName = parser.text();
                         } else if (IN_ORDER_FIELD.match(currentFieldName, parser.getDeprecationHandler())) {
@@ -400,6 +431,7 @@ public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilde
 
         LatticeQueryBuilder builder = new LatticeQueryBuilder(fieldName, value);
         builder.slop(slop);
+        builder.slopSeconds(slopSeconds);
         builder.inOrder(inOrder);
         builder.zeroTermsQuery(zeroTermsQuery);
         builder.boost(boost);
