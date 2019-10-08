@@ -35,7 +35,8 @@ public abstract class LatticePayloadScoreFuction {
      *
      * @see Spans
      */
-    public abstract float spanScore(int docId, String field, int start, int end, int width, int numPayloadsSeen, float currentScore, float currentSpanScore);
+    public abstract float spanScore(int docId, String field, int start, int end, int width, int numPayloadsSeen,
+                                    float currentScore, float currentSpanScore);
 
     /**
      * Calculate the score up to this point for this span doc and field
@@ -50,7 +51,8 @@ public abstract class LatticePayloadScoreFuction {
      *
      * @see Spans
      */
-    public abstract float currentLeafScore(int docId, String field, int start, int end, int numPayloadsSeen, float currentScore, float currentPayloadScore);
+    public abstract float currentLeafScore(int docId, String field, int start, int end, int numPayloadsSeen,
+                                           float currentScore, float currentPayloadScore);
 
     /**
      * Calculate the final score for all the payloads seen so far for this doc/field

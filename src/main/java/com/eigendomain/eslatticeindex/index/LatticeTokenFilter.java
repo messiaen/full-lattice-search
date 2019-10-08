@@ -41,7 +41,8 @@ public class LatticeTokenFilter<T extends LatticeTokenParts<T>> extends TokenFil
     private final ArrayList<Map.Entry<Float, Integer>> bucketEntries;
     private int repeatTok;
 
-    public LatticeTokenFilter(TokenStream input, SortedMap<Float, Integer> buckets, char fieldDelimiter, LatticeTokenPartsFactory<T> tokenPartsFactory) {
+    public LatticeTokenFilter(TokenStream input, SortedMap<Float, Integer> buckets, char fieldDelimiter,
+                              LatticeTokenPartsFactory<T> tokenPartsFactory) {
         super(input);
         this.tokenPartsFactory = tokenPartsFactory;
 

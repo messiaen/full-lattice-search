@@ -20,7 +20,12 @@ import org.elasticsearch.env.Environment;
 import org.elasticsearch.index.IndexSettings;
 import org.elasticsearch.index.analysis.AbstractTokenFilterFactory;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
 
 public class LatticeTokenFilterFactory extends AbstractTokenFilterFactory {
     private SortedMap<Float, Integer> buckets;
@@ -50,13 +55,13 @@ public class LatticeTokenFilterFactory extends AbstractTokenFilterFactory {
     }
 
     private LatticeTokenPartsFactory<?> getLatticeTokenPartsFactory() {
-        String format = this.latticeFormat.toLowerCase();
+        String format = this.latticeFormat.toLowerCase(Locale.ROOT);
         switch (format) {
             case "lattice":
-                System.out.println("Creating lattice format");
+                //System.out.println("Creating lattice format");
                 return new BaseLatticeTokenParts.Factory();
             case "audio":
-                System.out.println("Creating audio format");
+                //System.out.println("Creating audio format");
                 return new AudioLatticeTokenParts.Factory(this.audioSecondsPositionIncrementInterval);
         }
         throw new IllegalArgumentException("Invalid lattice format '" + latticeFormat + "'");
