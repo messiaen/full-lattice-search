@@ -18,7 +18,11 @@
 package com.eigendomain.eslatticeindex.index.query;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.LeafReaderContext;
@@ -59,7 +63,8 @@ public class LatticePayloadScoreQuery extends SpanQuery {
      * @param decoder a PayloadDecoder to convert payloads into float values
      * @param includeSpanScore include both span score and payload score in the scoring algorithm
      */
-    public LatticePayloadScoreQuery(SpanQuery wrappedQuery, LatticePayloadScoreFuction function, PayloadDecoder decoder, boolean includeSpanScore) {
+    public LatticePayloadScoreQuery(SpanQuery wrappedQuery, LatticePayloadScoreFuction function,
+                                    PayloadDecoder decoder, boolean includeSpanScore) {
         this.wrappedQuery = Objects.requireNonNull(wrappedQuery);
         this.function = Objects.requireNonNull(function);
         this.decoder = Objects.requireNonNull(decoder);
@@ -70,9 +75,10 @@ public class LatticePayloadScoreQuery extends SpanQuery {
      * Creates a new LatticePayloadScoreQuery that includes the underlying span scores
      * @param wrappedQuery the query to wrap
      * @param function a PayloadFunction to use to modify the scores
-	 * @param decoder a PayloadDecoder to use to decode each payload
+     * @param decoder a PayloadDecoder to use to decode each payload
      */
-    public LatticePayloadScoreQuery(SpanQuery wrappedQuery, LatticePayloadScoreFuction function, PayloadDecoder decoder) {
+    public LatticePayloadScoreQuery(SpanQuery wrappedQuery, LatticePayloadScoreFuction function,
+                                    PayloadDecoder decoder) {
         this(wrappedQuery, function, decoder, true);
     }
 
@@ -138,7 +144,7 @@ public class LatticePayloadScoreQuery extends SpanQuery {
 
         private final SpanWeight innerWeight;
 
-        public PayloadSpanWeight(IndexSearcher searcher, SpanWeight innerWeight, float boost) throws IOException {
+        PayloadSpanWeight(IndexSearcher searcher, SpanWeight innerWeight, float boost) throws IOException {
             super(LatticePayloadScoreQuery.this, searcher, null, boost);
             this.innerWeight = innerWeight;
         }
@@ -160,7 +166,7 @@ public class LatticePayloadScoreQuery extends SpanQuery {
                 return null;
             LeafSimScorer docScorer = innerWeight.getSimScorer(context);
             PayloadSpans payloadSpans = new PayloadSpans(spans, decoder);
-            System.out.println("spans=" + payloadSpans.toString());
+            //System.out.println("spans=" + payloadSpans.toString());
             return new PayloadSpanScorer(this, payloadSpans, docScorer);
         }
 
@@ -186,7 +192,8 @@ public class LatticePayloadScoreQuery extends SpanQuery {
             if (includeSpanScore) {
                 SpanWeight innerWeight = ((PayloadSpanWeight) scorer.getWeight()).innerWeight;
                 Explanation innerExpl = innerWeight.explain(context, doc);
-                return Explanation.match(scorer.scoreCurrentDoc(), "PayloadSpanQuery, product of:", innerExpl, payloadExpl);
+                return Explanation.match(scorer.scoreCurrentDoc(), "PayloadSpanQuery, product of:",
+                        innerExpl, payloadExpl);
             }
 
             return scorer.getPayloadExplanation();
@@ -229,7 +236,7 @@ public class LatticePayloadScoreQuery extends SpanQuery {
             currentSpanScore = function.currentLeafScore(docID(), getField(), in.startPosition(), in.endPosition(),
                     payloadsSeen, currentSpanScore, payloadFactor);
 
-            System.out.println("term=" + term + "; payload=" + payloadFactor);
+            //System.out.println("term=" + term + "; payload=" + payloadFactor);
             payloadsSeen++;
         }
 
@@ -241,7 +248,7 @@ public class LatticePayloadScoreQuery extends SpanQuery {
             currentSpanScore = 0.0f;
             payloadsSeen = 0;
             in.collect(this);
-            System.out.println("span=" + in + "; width=" + in.width());
+            //System.out.println("span=" + in + "; width=" + in.width());
             if (in.startPosition() != Spans.NO_MORE_POSITIONS) {
                 payloadScore = function.spanScore(docID(), getField(), in.startPosition(), in.endPosition(),
                         in.width(), payloadsSeen, payloadScore, currentSpanScore);
@@ -310,7 +317,9 @@ public class LatticePayloadScoreQuery extends SpanQuery {
             if (expl.getValue().floatValue() < 0) {
                 expl = Explanation.match(0, "truncated score, max of:", Explanation.match(0f, "minimum score"), expl);
             } else if (Float.isNaN(expl.getValue().floatValue())) {
-                expl = Explanation.match(0, "payload score, computed as (score == NaN ? 0 : score) since NaN is an illegal score from:", expl);
+                expl = Explanation.match(0,
+                        "payload score, computed as (score == NaN ? 0 : score) since NaN is an illegal score from:",
+                        expl);
             }
             return expl;
         }
@@ -322,7 +331,7 @@ public class LatticePayloadScoreQuery extends SpanQuery {
         @Override
         protected float scoreCurrentDoc() throws IOException {
             float score = getPayloadScore();
-            System.out.println("score=" + score);
+            //System.out.println("score=" + score);
             if (includeSpanScore)
                 return getSpanScore() * score;
             return score;

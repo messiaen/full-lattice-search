@@ -2,8 +2,8 @@
 MAKEFLAGS += --no-builtin-rules
 MAKEFLAGS += --no-builtin-variables
 
-ES_VERSION = $(shell grep elasticsearchVersion gradle.properties  | cut -d " " -f 3)
-VERSION = $(shell cat VERSION.txt)
+ES_VERSION = $(shell grep ES_VERSION .env | cut -d '=' -f 2)
+VERSION = $(shell grep PLUGIN_VERSION .env | cut -d '=' -f 2)
 IMAGE_VERSION = $(VERSION)-$(ES_VERSION)
 NAME = "messiaen/elasticsearch-plug-ph-lat"
 
@@ -16,7 +16,7 @@ build_plugin:
 	./gradlew clean assemble
 
 build_image: build_plugin
-	docker build --no-cache -t $(NAME):$(IMAGE_VERSION) .
+	docker build --no-cache --build-arg plugin_version=$(VERSION) --build-arg es_version=$(ES_VERSION) -t $(NAME):$(IMAGE_VERSION) .
 	docker tag $(NAME):$(IMAGE_VERSION) $(NAME):latest
 
 push:

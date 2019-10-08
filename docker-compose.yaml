@@ -1,13 +1,13 @@
 version: "2"
 services:
   kibana:
-    image: docker.elastic.co/kibana/kibana:7.3.0
+    image: docker.elastic.co/kibana/kibana:${ES_VERSION}
     ports:
       - "5601:5601"
     environment:
       ELASTICSEARCH_HOSTS: http://es01:9200
   es01:
-    image: messiaen/elasticsearch-plug-ph-lat
+    image: messiaen/elasticsearch-plug-ph-lat:${PLUGIN_VERSION}-${ES_VERSION}
     environment:
       - node.name=es01
       - discovery.type=single-node

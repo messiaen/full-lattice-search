@@ -1,7 +1,10 @@
-FROM docker.elastic.co/elasticsearch/elasticsearch:7.3.0
+ARG es_version=9.0.0.0
+FROM docker.elastic.co/elasticsearch/elasticsearch:${es_version}
 
-# version should match VERSION.txt plus hyphen plus ES version from gradle.properties
-COPY build/distributions/es-lattice-index-plugin-2.0.0-rc1-7.3.0.zip /es-lattice-index-plugin.zip
+# got to declare again here
+ARG es_version=0.1
+ARG plugin_version=0.2
+COPY build/distributions/es-lattice-index-plugin-${plugin_version}-${es_version}.zip /es-lattice-index-plugin.zip
 
 RUN bin/elasticsearch-plugin install analysis-phonetic
 RUN bin/elasticsearch-plugin install file:///es-lattice-index-plugin.zip && rm -f /es-lattice-index-plugin.zip

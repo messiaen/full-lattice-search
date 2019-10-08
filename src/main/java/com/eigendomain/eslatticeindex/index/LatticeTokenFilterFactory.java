@@ -20,7 +20,11 @@ import org.elasticsearch.env.Environment;
 import org.elasticsearch.index.IndexSettings;
 import org.elasticsearch.index.analysis.AbstractTokenFilterFactory;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
 
 public class LatticeTokenFilterFactory extends AbstractTokenFilterFactory {
     private SortedMap<Float, Integer> buckets;
