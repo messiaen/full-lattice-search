@@ -19,7 +19,6 @@
 
 package com.eigendomain.eslatticeindex.mapper;
 
-import com.eigendomain.eslatticeindex.LatticeFormat;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexOptions;
@@ -48,6 +47,7 @@ import org.elasticsearch.index.query.QueryShardContext;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import static org.elasticsearch.index.mapper.TypeParsers.parseTextField;
@@ -57,11 +57,24 @@ public class LatticeFieldMapper extends FieldMapper {
     public static final String CONTENT_TYPE = "lattice";
     private static final int POSITION_INCREMENT_GAP_USE_ANALYZER = -1;
 
+    public static final String FORMAT_LATTICE = "lattice";
+    public static final String FORMAT_AUDIO = "audio";
+
     public static class Defaults {
         public static final MappedFieldType FIELD_TYPE = new LatticeFieldType();
         static {
             FIELD_TYPE.freeze();
         }
+    }
+
+    public static String parseLatticeFormat(String format) {
+        switch (format.toLowerCase(Locale.ROOT)) {
+            case FORMAT_LATTICE:
+                return FORMAT_LATTICE;
+            case FORMAT_AUDIO:
+                return FORMAT_AUDIO;
+        }
+        return null;
     }
 
     public static class Builder extends FieldMapper.Builder<Builder, LatticeFieldMapper> {
@@ -94,11 +107,11 @@ public class LatticeFieldMapper extends FieldMapper {
         }
 
         public Builder latticeFormat(String format) {
-            LatticeFormat f = LatticeFormat.fromString(format);
+            String f = parseLatticeFormat(format);
             if (null == f) {
                 throw new IllegalArgumentException("Invalid lattice format '" + format + "'");
             }
-            this.latticeFormat = f.toString();
+            this.latticeFormat = f;
             return this;
         }
 
