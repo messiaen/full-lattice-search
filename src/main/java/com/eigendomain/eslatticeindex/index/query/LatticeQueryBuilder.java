@@ -255,7 +255,8 @@ public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilde
 
         if (fieldType instanceof LatticeFieldMapper.LatticeFieldType) {
             LatticeFieldMapper.LatticeFieldType latFieldType = (LatticeFieldMapper.LatticeFieldType) fieldType;
-            System.out.printf("fieldType.name=%s; fieldType.inc=%f; fieldType.format=%s\n", latFieldType.typeName(), latFieldType.audioPositionIncrementSeconds(), latFieldType.latticeFormat());
+            //System.out.printf("fieldType.name=%s; fieldType.inc=%f; fieldType.format=%s\n",
+            //        latFieldType.typeName(), latFieldType.audioPositionIncrementSeconds(), latFieldType.latticeFormat());
         }
 
         if (analyzer == null) {

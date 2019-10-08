@@ -20,15 +20,7 @@
 package com.eigendomain.eslatticeindex.mapper;
 
 import com.eigendomain.eslatticeindex.LatticeFormat;
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.AnalyzerWrapper;
-import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
-import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
-import org.apache.lucene.analysis.tokenattributes.PositionLengthAttribute;
-import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexOptions;
 import org.apache.lucene.index.IndexableField;
@@ -39,11 +31,9 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.spans.SpanMultiTermQueryWrapper;
 import org.apache.lucene.search.spans.SpanQuery;
-import org.elasticsearch.ElasticsearchParseException;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.support.XContentMapValues;
-import org.elasticsearch.index.analysis.AnalyzerScope;
 import org.elasticsearch.index.analysis.NamedAnalyzer;
 import org.elasticsearch.index.mapper.FieldMapper;
 import org.elasticsearch.index.mapper.FieldNamesFieldMapper;
@@ -54,22 +44,11 @@ import org.elasticsearch.index.mapper.ParseContext;
 import org.elasticsearch.index.mapper.StringFieldType;
 import org.elasticsearch.index.mapper.TextFieldMapper;
 import org.elasticsearch.index.query.QueryShardContext;
-import org.elasticsearch.search.fetch.FetchSubPhase.HitContext;
 
 import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.UncheckedIOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static org.elasticsearch.index.mapper.TypeParsers.parseTextField;
 
@@ -329,7 +308,8 @@ public class LatticeFieldMapper extends FieldMapper {
         if (includeDefaults || positionIncrementGap != POSITION_INCREMENT_GAP_USE_ANALYZER) {
             builder.field("position_increment_gap", positionIncrementGap);
         }
-        if (includeDefaults || fieldType().audioPositionIncrementSeconds() != ((LatticeFieldType) defaultFieldType).audioPositionIncrementSeconds()) {
+        if (includeDefaults || fieldType().audioPositionIncrementSeconds() !=
+                ((LatticeFieldType) defaultFieldType).audioPositionIncrementSeconds()) {
             builder.field("audio_position_increment_seconds", audioPositionIncrementSeconds);
         }
         if (includeDefaults || fieldType().latticeFormat() != ((LatticeFieldType) defaultFieldType).latticeFormat()) {
