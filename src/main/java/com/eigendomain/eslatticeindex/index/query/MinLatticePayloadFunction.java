@@ -19,7 +19,8 @@ package com.eigendomain.eslatticeindex.index.query;
 
 public class MinLatticePayloadFunction extends DefaultLatticePayloadFunction {
     @Override
-    public float spanScore(int docId, String field, int start, int end, int width, int numPayloadsSeen, float currentScore, float currentSpanScore) {
+    public float spanScore(int docId, String field, int start, int end, int width, int numPayloadsSeen,
+                           float currentScore, float currentSpanScore) {
         // the scores are normalized by the length of the span
         // this incorporates that number of tokens in the query plus the number of skipped tokens
         float score = (float) Math.exp((SCORE_MULT + currentSpanScore) - Math.log(end - start));
