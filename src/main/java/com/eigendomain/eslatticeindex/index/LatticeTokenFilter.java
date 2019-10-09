@@ -69,10 +69,9 @@ public class LatticeTokenFilter<T extends LatticeTokenParts<T>> extends TokenFil
                 termAtt.setLength(currTokParts.tokenLen());
 
                 if (firstTok) {
-                    posIncAtt.setPositionIncrement(1);
+                    posIncAtt.setPositionIncrement(currTokParts.firstTokenIncrement());
                 } else {
-                   int increment = currTokParts.positionIncrement(lastTokParts);
-                   posIncAtt.setPositionIncrement(increment);
+                   posIncAtt.setPositionIncrement(currTokParts.positionIncrement(lastTokParts));
                 }
 
                 firstTok = false;

@@ -64,13 +64,13 @@ public class AudioLatticeTokenPartsTests extends ESTestCase {
         lastLen = lastTok.length;
         last.parseToken(lastTok, lastLen);
 
-        Assert.assertEquals(11, curr.positionIncrement(last));
+        Assert.assertEquals(10, curr.positionIncrement(last));
 
         curr = new AudioLatticeTokenParts('|', 0.01f);
         currTok = "dog|3|10|0.5|2.28|3.0".toCharArray();
         currLen = currTok.length;
         curr.parseToken(currTok, currLen);
 
-        Assert.assertEquals(103, curr.positionIncrement(last));
+        Assert.assertEquals(102, curr.positionIncrement(last));
     }
 }

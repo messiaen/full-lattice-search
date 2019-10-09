@@ -320,7 +320,7 @@ public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilde
             if (latFieldType.latticeFormat().equals(LatticeFieldMapper.FORMAT_AUDIO)) {
                 //System.out.println("incsecs: " + latFieldType.audioPositionIncrementSeconds());
                 querySlop = secsToSlop(latFieldType.audioPositionIncrementSeconds(), numTerms);
-                //System.out.println("slop: " + s);
+                //System.out.println("querySlop: " + querySlop);
             }
         }
         builder.setSlop(querySlop);
@@ -333,7 +333,10 @@ public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilde
     }
 
     private int secsToSlop(float posIncSecs, int numTerms) {
-        return ((int)Math.floor(this.slopSeconds / posIncSecs) + 1) - (numTerms - 2);
+        // -1 because slop only counts skipped tokens
+        // -(numTerms - 2) because each matched token taken the place of a skipped
+        // // token for spans of three terms or more
+        return ((int)Math.floor(this.slopSeconds / posIncSecs) - (numTerms - 2)) - 1;
     }
 
     @Override

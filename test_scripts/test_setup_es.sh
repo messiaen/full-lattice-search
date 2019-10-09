@@ -109,9 +109,9 @@ curl -H 'Content-Type: application/json' -XPUT "http://localhost:9200/mytest2?pr
 curl -XGET "http://localhost:9200/_cluster/health?wait_for_status=green&timeout=120s&pretty"
 
 curl -XPOST -H 'Content-Type: application/json' 'http://localhost:9200/mytest/_doc/12345?pretty' -d '{
-  "lattices": "quick|0|0|1.0|0.0|0.5 brown|1|0|1.0|1.5|1.7 fox|2|0|1.0|2.5|3.0 box|2|0|1.0|2.5|3.0"
+  "lattices": "quick|0|0|1.0|0.0|0.5 brown|1|0|1.0|1.5|1.7 fox|2|0|1.0|2.5|3.0 box|2|0|1.0|2.5|3.0 jumped|3|0|1.0|3.0|3.7"
 }'
 
 curl -XPOST -H 'Content-Type: application/json' 'http://localhost:9200/mytest2/_doc/12345?pretty' -d '{
-  "lattices": "quick|0|0|1.0|0.0|0.5 brown|1|0|1.0|1.5|1.7 fox|2|0|1.0|2.5|3.0 box|2|0|1.0|2.5|3.0"
+  "lattices": "quick|0|0|1.0|0.0|0.5 brown|1|0|1.0|1.5|1.7 fox|2|0|1.0|2.5|3.0 box|2|0|1.0|2.5|3.0 jumped|3|0|1.0|3.0|3.7"
 }'

@@ -4,6 +4,7 @@ MAKEFLAGS += --no-builtin-variables
 
 ES_VERSION = $(shell grep ES_VERSION .env | cut -d '=' -f 2)
 VERSION = $(shell grep PLUGIN_VERSION .env | cut -d '=' -f 2)
+COMMIT_HASH = $(shell grep COMMIT_HASH .env | cut -d '=' -f 2)
 NAME = "registry.gitlab.com/hedgehogai/full-lattice-search/full-lattice-search"
 IMAGE_VERSION = $(VERSION)-$(ES_VERSION)
 
@@ -16,7 +17,7 @@ build_plugin:
 	./gradlew clean assemble
 
 build_image: build_plugin
-	docker build --no-cache --build-arg plugin_version=$(VERSION) --build-arg es_version=$(ES_VERSION) -t $(NAME):$(IMAGE_VERSION) .
+	docker build --no-cache --build-arg commit_hash=$(COMMIT_HASH) --build-arg plugin_version=$(VERSION) --build-arg es_version=$(ES_VERSION) -t $(NAME):$(IMAGE_VERSION) .
 	docker tag $(NAME):$(IMAGE_VERSION) $(NAME):latest
 
 push:
