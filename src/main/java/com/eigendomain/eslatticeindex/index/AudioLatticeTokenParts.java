@@ -53,7 +53,7 @@ public class AudioLatticeTokenParts extends LatticeTokenParts<AudioLatticeTokenP
         }
 
         // TODO first round of this will use the start of each word
-        return (int)Math.ceil((this.startTime - lastTokenParts.startTime) / this.positionIncrementSecs);
+        return (int)Math.floor((this.startTime - lastTokenParts.startTime) / this.positionIncrementSecs) + 1;
     }
 
     @Override

@@ -281,19 +281,6 @@ public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilde
         }
 
         SpanNearQuery.Builder builder =  new SpanNearQuery.Builder(fieldName, inOrder);
-        if (fieldType instanceof LatticeFieldMapper.LatticeFieldType) {
-            LatticeFieldMapper.LatticeFieldType latFieldType = (LatticeFieldMapper.LatticeFieldType) fieldType;
-            if (latFieldType.latticeFormat().equals(LatticeFieldMapper.FORMAT_AUDIO)) {
-                //System.out.println("incsecs: " + latFieldType.audioPositionIncrementSeconds());
-                int s = secsToSlop(latFieldType.audioPositionIncrementSeconds());
-                //System.out.println("slop: " + s);
-                builder.setSlop(s);
-            } else {
-                builder.setSlop(slop);
-            }
-        } else {
-            builder.setSlop(slop);
-        }
 
         List<SpanTermQuery> termQueries = new ArrayList<>();
 
@@ -326,6 +313,18 @@ public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilde
                    this.includeSpanScore);
         }
 
+        int numTerms = termQueries.size();
+        int querySlop = slop;
+        if (fieldType instanceof LatticeFieldMapper.LatticeFieldType) {
+            LatticeFieldMapper.LatticeFieldType latFieldType = (LatticeFieldMapper.LatticeFieldType) fieldType;
+            if (latFieldType.latticeFormat().equals(LatticeFieldMapper.FORMAT_AUDIO)) {
+                //System.out.println("incsecs: " + latFieldType.audioPositionIncrementSeconds());
+                querySlop = secsToSlop(latFieldType.audioPositionIncrementSeconds(), numTerms);
+                //System.out.println("slop: " + s);
+            }
+        }
+        builder.setSlop(querySlop);
+
         for (SpanTermQuery tq : termQueries) {
             builder.addClause(tq);
         }
@@ -333,8 +332,8 @@ public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilde
         return new LatticePayloadScoreQuery(spanQuery, this.payloadFunction, this.payloadDecoder, this.includeSpanScore);
     }
 
-    private int secsToSlop(float posIncSecs) {
-        return (int)Math.ceil(this.slopSeconds / posIncSecs);
+    private int secsToSlop(float posIncSecs, int numTerms) {
+        return ((int)Math.floor(this.slopSeconds / posIncSecs) + 1) - (numTerms - 2);
     }
 
     @Override

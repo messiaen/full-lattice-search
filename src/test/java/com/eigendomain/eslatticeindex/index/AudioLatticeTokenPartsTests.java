@@ -71,6 +71,6 @@ public class AudioLatticeTokenPartsTests extends ESTestCase {
         currLen = currTok.length;
         curr.parseToken(currTok, currLen);
 
-        Assert.assertEquals(102, curr.positionIncrement(last));
+        Assert.assertEquals(103, curr.positionIncrement(last));
     }
 }
