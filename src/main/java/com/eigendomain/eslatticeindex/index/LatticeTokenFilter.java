@@ -58,9 +58,13 @@ public class LatticeTokenFilter<T extends LatticeTokenParts<T>> extends TokenFil
     }
 
     @Override
-    public boolean incrementToken() throws IOException {
+    public final boolean incrementToken() throws IOException {
+        clearAttributes();
         if (repeatTok > 0) {
             posIncAtt.setPositionIncrement(0);
+            payAtt.setPayload(lastTokParts.encodedScore());
+            termAtt.append(lastTokParts.token());
+            termAtt.setLength(lastTokParts.tokenLen());
             repeatTok--;
             return true;
         } else if (input.incrementToken()) {
