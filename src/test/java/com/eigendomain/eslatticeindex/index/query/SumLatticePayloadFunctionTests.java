@@ -18,11 +18,11 @@ import org.elasticsearch.test.ESTestCase;
 import org.junit.Assert;
 //import org.junit.Test;
 
-public class DefaultLatticePayloadFunctionTests extends ESTestCase {
+public class SumLatticePayloadFunctionTests extends ESTestCase {
 
     //@Test
     public void testSpanScore() {
-        LatticePayloadScoreFuction function = new DefaultLatticePayloadFunction();
+        LatticePayloadScoreFuction function = new SumLatticePayloadFunction();
         int start = 1;
         int end = 3;
         float currentScore = 0;
@@ -34,7 +34,7 @@ public class DefaultLatticePayloadFunctionTests extends ESTestCase {
 
     //@Test
     public void testCurrentLeafScore() {
-        LatticePayloadScoreFuction function = new DefaultLatticePayloadFunction();
+        LatticePayloadScoreFuction function = new SumLatticePayloadFunction();
         int start = 1;
         int end = 2;
         float currentScore = 0;
@@ -47,16 +47,16 @@ public class DefaultLatticePayloadFunctionTests extends ESTestCase {
         actual = function.currentLeafScore(0, "", start, end, 1, currentScore, 0.03f);
         Assert.assertEquals(expected, actual, 0.000001f);
 
-        expected = DefaultLatticePayloadFunction.MIN_LOG_SCORE;
+        expected = SumLatticePayloadFunction.MIN_LOG_SCORE;
         actual = function.currentLeafScore(0, "", start, end, 3, -12.5f, 0.03f);
         Assert.assertEquals(expected, actual, 0.000001f);
     }
 
     //@Test
     public void testDocScore() {
-        LatticePayloadScoreFuction function = new DefaultLatticePayloadFunction();
+        LatticePayloadScoreFuction function = new SumLatticePayloadFunction();
 
-        float expected = DefaultLatticePayloadFunction.MIN_SCORE;
+        float expected = SumLatticePayloadFunction.MIN_SCORE;
         float actual = function.docScore(0, "", 0, 0.9987f);
         Assert.assertEquals(expected, actual, 0.000001);
 

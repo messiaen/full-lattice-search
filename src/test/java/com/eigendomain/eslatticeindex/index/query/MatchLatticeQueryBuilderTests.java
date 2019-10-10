@@ -41,7 +41,7 @@ import java.util.Collections;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.notNullValue;
 
-public class LatticeQueryBuilderTests extends AbstractQueryTestCase<LatticeQueryBuilder> {
+public class MatchLatticeQueryBuilderTests extends AbstractQueryTestCase<MatchLatticeQueryBuilder> {
     @Override
     protected Collection<Class<? extends Plugin>> getPlugins() {
         return Collections.singletonList(LatticeIndexPlugin.class);
@@ -49,7 +49,7 @@ public class LatticeQueryBuilderTests extends AbstractQueryTestCase<LatticeQuery
 
 
     @Override
-    protected LatticeQueryBuilder doCreateTestQueryBuilder() {
+    protected MatchLatticeQueryBuilder doCreateTestQueryBuilder() {
         String fieldName = randomFrom(STRING_FIELD_NAME, STRING_ALIAS_FIELD_NAME, BOOLEAN_FIELD_NAME, INT_FIELD_NAME,
                 DOUBLE_FIELD_NAME, DATE_FIELD_NAME);
         Object value;
@@ -64,7 +64,7 @@ public class LatticeQueryBuilderTests extends AbstractQueryTestCase<LatticeQuery
             value = getRandomValueForFieldName(fieldName);
         }
 
-        LatticeQueryBuilder query = new LatticeQueryBuilder(fieldName, value);
+        MatchLatticeQueryBuilder query = new MatchLatticeQueryBuilder(fieldName, value);
 
         if (randomBoolean() && isTextField(fieldName)) {
             query.analyzerString(randomFrom("simple", "keyword", "whitespace"));
@@ -94,7 +94,7 @@ public class LatticeQueryBuilderTests extends AbstractQueryTestCase<LatticeQuery
     }
 
     @Override
-    protected void doAssertLuceneQuery(LatticeQueryBuilder queryBuilder, Query query, SearchContext context) throws IOException {
+    protected void doAssertLuceneQuery(MatchLatticeQueryBuilder queryBuilder, Query query, SearchContext context) throws IOException {
         assertThat(query, notNullValue());
 
         if (query instanceof MatchAllDocsQuery) {
@@ -112,15 +112,15 @@ public class LatticeQueryBuilderTests extends AbstractQueryTestCase<LatticeQuery
     }
 
     public void testIllegalValues() {
-        IllegalArgumentException e = expectThrows(IllegalArgumentException.class, () -> new LatticeQueryBuilder(null, "value"));
+        IllegalArgumentException e = expectThrows(IllegalArgumentException.class, () -> new MatchLatticeQueryBuilder(null, "value"));
         assertEquals("[match_lattice] requires fieldName", e.getMessage());
 
-        e = expectThrows(IllegalArgumentException.class, () -> new LatticeQueryBuilder("fieldName", null));
+        e = expectThrows(IllegalArgumentException.class, () -> new MatchLatticeQueryBuilder("fieldName", null));
         assertEquals("[match_lattice] requires query value", e.getMessage());
     }
 
     public void testBadAnalyzer() throws IOException {
-        LatticeQueryBuilder matchQuery = new LatticeQueryBuilder("fieldName", "text");
+        MatchLatticeQueryBuilder matchQuery = new MatchLatticeQueryBuilder("fieldName", "text");
         matchQuery.analyzerString("bogusAnalyzer");
         QueryShardException e = expectThrows(QueryShardException.class, () -> matchQuery.toQuery(createShardContext()));
         assertThat(e.getMessage(), CoreMatchers.containsString("analyzer [bogusAnalyzer] not found"));
@@ -142,12 +142,12 @@ public class LatticeQueryBuilderTests extends AbstractQueryTestCase<LatticeQuery
                 "      \"zero_terms_query\" : \"NONE\",\n" +
                 "      \"in_order\" : true,\n" +
                 "      \"include_span_score\" : true,\n" +
-                "      \"payload_function\" : \"default\",\n" +
+                "      \"payload_function\" : \"sum\",\n" +
                 "      \"boost\" : 1.0\n" +
                 "    }\n" +
                 "  }\n" +
                 "}";
-        LatticeQueryBuilder qb = (LatticeQueryBuilder) parseQuery(json1);
+        MatchLatticeQueryBuilder qb = (MatchLatticeQueryBuilder) parseQuery(json1);
         checkGeneratedJson(expected, qb);
     }
 
@@ -167,7 +167,7 @@ public class LatticeQueryBuilderTests extends AbstractQueryTestCase<LatticeQuery
                 "  }\n" +
                 "}";
 
-        LatticeQueryBuilder parsed = (LatticeQueryBuilder) parseQuery(json);
+        MatchLatticeQueryBuilder parsed = (MatchLatticeQueryBuilder) parseQuery(json);
         checkGeneratedJson(json, parsed);
 
         assertEquals(json, "this is a test", parsed.value());

@@ -9,7 +9,7 @@
             analysis:
               tokenizer:
                 ws:
-                  type: my_whitespace
+                  type: lattice_whitespace
               analyzer:
                 lat_ana:
                   type: custom
@@ -45,7 +45,7 @@
       search:
         index: mytest_base
         rest_total_hits_as_int: true
-        body: {"query": { "match_lattice": { "lattices": { "query": "quick box jumped", "slop": 1, "slop_seconds": 0.0, "include_span_score": "false", "payload_function": "default", "in_order": "true" } } } }
+        body: {"query": { "match_lattice": { "lattices": { "query": "quick box jumped", "slop": 1, "slop_seconds": 0.0, "include_span_score": "false", "payload_function": "sum", "in_order": "true" } } } }
 
   - match: {hits.total: 1}
   - match: {_shards.failed: 0}
@@ -56,7 +56,7 @@
       search:
         index: mytest_base
         rest_total_hits_as_int: true
-        body: {"query": { "match_lattice": { "lattices": { "query": "quick fox jumped", "slop": 0, "slop_seconds": 0.0, "include_span_score": "false", "payload_function": "default", "in_order": "true" } } } }
+        body: {"query": { "match_lattice": { "lattices": { "query": "quick fox jumped", "slop": 0, "slop_seconds": 0.0, "include_span_score": "false", "payload_function": "sum", "in_order": "true" } } } }
 
   - match: {hits.total: 0}
   - match: {_shards.failed: 0}
@@ -67,7 +67,7 @@
       search:
         index: mytest_base
         rest_total_hits_as_int: true
-        body: {"query": { "match_lattice": { "lattices": { "query": "jumped quick", "slop": 100, "slop_seconds": 4000, "include_span_score": "false", "payload_function": "default", "in_order": "true" } } } }
+        body: {"query": { "match_lattice": { "lattices": { "query": "jumped quick", "slop": 100, "slop_seconds": 4000, "include_span_score": "false", "payload_function": "sum", "in_order": "true" } } } }
 
   - match: {hits.total: 0}
   - match: {_shards.failed: 0}
@@ -78,7 +78,7 @@
       search:
         index: mytest_base
         rest_total_hits_as_int: true
-        body: {"query": { "match_lattice": { "lattices": { "query": "fox box", "slop": 100, "slop_seconds": 4000, "include_span_score": "false", "payload_function": "default", "in_order": "true" } } } }
+        body: {"query": { "match_lattice": { "lattices": { "query": "fox box", "slop": 100, "slop_seconds": 4000, "include_span_score": "false", "payload_function": "sum", "in_order": "true" } } } }
 
   - match: {hits.total: 0}
   - match: {_shards.failed: 0}
@@ -97,7 +97,7 @@
             analysis:
               tokenizer:
                 ws:
-                  type: my_whitespace
+                  type: lattice_whitespace
               analyzer:
                 lat_ana:
                   type: custom
@@ -127,7 +127,7 @@
             analysis:
               tokenizer:
                 ws:
-                  type: my_whitespace
+                  type: lattice_whitespace
               analyzer:
                 lat_ana:
                   type: custom
@@ -165,7 +165,7 @@
       search:
         index: mytest
         rest_total_hits_as_int: true
-        body: {"query": { "match_lattice": { "lattices": { "query": "quick brown fox jumped", "slop": 0, "slop_seconds": 3.0, "include_span_score": "false", "payload_function": "default", "in_order": "true" } } } }
+        body: {"query": { "match_lattice": { "lattices": { "query": "quick brown fox jumped", "slop": 0, "slop_seconds": 3.0, "include_span_score": "false", "payload_function": "sum", "in_order": "true" } } } }
 
   - match: {hits.total: 1}
   - match: {_shards.failed: 0}
@@ -176,7 +176,7 @@
       search:
         index: mytest
         rest_total_hits_as_int: true
-        body: {"query": { "match_lattice": { "lattices": { "query": "quick brown fox jumped", "slop": 0, "slop_seconds": 2.9, "include_span_score": "false", "payload_function": "default", "in_order": "true" } } } }
+        body: {"query": { "match_lattice": { "lattices": { "query": "quick brown fox jumped", "slop": 0, "slop_seconds": 2.9, "include_span_score": "false", "payload_function": "sum", "in_order": "true" } } } }
 
   - match: {hits.total: 0}
 
@@ -184,7 +184,7 @@
       search:
         index: mytest2
         rest_total_hits_as_int: true
-        body: {"query": { "match_lattice": { "lattices": { "query": "quick brown fox jumped", "slop": 0, "slop_seconds": 3.0, "include_span_score": "false", "payload_function": "default", "in_order": "true" } } } }
+        body: {"query": { "match_lattice": { "lattices": { "query": "quick brown fox jumped", "slop": 0, "slop_seconds": 3.0, "include_span_score": "false", "payload_function": "sum", "in_order": "true" } } } }
 
   - match: {hits.total: 1}
 
@@ -192,7 +192,7 @@
       search:
         index: mytest2
         rest_total_hits_as_int: true
-        body: {"query": { "match_lattice": { "lattices": { "query": "quick brown fox jumped", "slop": 0, "slop_seconds": 2.9, "include_span_score": "false", "payload_function": "default", "in_order": "true" } } } }
+        body: {"query": { "match_lattice": { "lattices": { "query": "quick brown fox jumped", "slop": 0, "slop_seconds": 2.9, "include_span_score": "false", "payload_function": "sum", "in_order": "true" } } } }
 
   - match: {hits.total: 0}
 
@@ -200,7 +200,7 @@
       search:
         index: mytest
         rest_total_hits_as_int: true
-        body: {"query": { "match_lattice": { "lattices": { "query": "quick fox jumped", "slop": 0, "slop_seconds": 3.0, "include_span_score": "false", "payload_function": "default", "in_order": "true" } } } }
+        body: {"query": { "match_lattice": { "lattices": { "query": "quick fox jumped", "slop": 0, "slop_seconds": 3.0, "include_span_score": "false", "payload_function": "sum", "in_order": "true" } } } }
 
   - match: {hits.total: 1}
 
@@ -208,7 +208,7 @@
       search:
         index: mytest
         rest_total_hits_as_int: true
-        body: {"query": { "match_lattice": { "lattices": { "query": "quick box jumped", "slop": 0, "slop_seconds": 2.9, "include_span_score": "false", "payload_function": "default", "in_order": "true" } } } }
+        body: {"query": { "match_lattice": { "lattices": { "query": "quick box jumped", "slop": 0, "slop_seconds": 2.9, "include_span_score": "false", "payload_function": "sum", "in_order": "true" } } } }
 
   - match: {hits.total: 0}
 
@@ -216,7 +216,7 @@
       search:
         index: mytest2
         rest_total_hits_as_int: true
-        body: {"query": { "match_lattice": { "lattices": { "query": "quick box jumped", "slop": 0, "slop_seconds": 3.0, "include_span_score": "false", "payload_function": "default", "in_order": "true" } } } }
+        body: {"query": { "match_lattice": { "lattices": { "query": "quick box jumped", "slop": 0, "slop_seconds": 3.0, "include_span_score": "false", "payload_function": "sum", "in_order": "true" } } } }
 
   - match: {hits.total: 1}
 
@@ -224,7 +224,7 @@
       search:
         index: mytest2
         rest_total_hits_as_int: true
-        body: {"query": { "match_lattice": { "lattices": { "query": "quick fox jumped", "slop": 0, "slop_seconds": 2.9, "include_span_score": "false", "payload_function": "default", "in_order": "true" } } } }
+        body: {"query": { "match_lattice": { "lattices": { "query": "quick fox jumped", "slop": 0, "slop_seconds": 2.9, "include_span_score": "false", "payload_function": "sum", "in_order": "true" } } } }
 
   - match: {hits.total: 0}
 
@@ -232,7 +232,7 @@
       search:
         index: mytest
         rest_total_hits_as_int: true
-        body: {"query": { "match_lattice": { "lattices": { "query": "quick jumped", "slop": 0, "slop_seconds": 3.0, "include_span_score": "false", "payload_function": "default", "in_order": "true" } } } }
+        body: {"query": { "match_lattice": { "lattices": { "query": "quick jumped", "slop": 0, "slop_seconds": 3.0, "include_span_score": "false", "payload_function": "sum", "in_order": "true" } } } }
 
   - match: {hits.total: 1}
 
@@ -240,7 +240,7 @@
       search:
         index: mytest
         rest_total_hits_as_int: true
-        body: {"query": { "match_lattice": { "lattices": { "query": "quick jumped", "slop": 0, "slop_seconds": 2.9, "include_span_score": "false", "payload_function": "default", "in_order": "true" } } } }
+        body: {"query": { "match_lattice": { "lattices": { "query": "quick jumped", "slop": 0, "slop_seconds": 2.9, "include_span_score": "false", "payload_function": "sum", "in_order": "true" } } } }
 
   - match: {hits.total: 0}
 
@@ -248,7 +248,7 @@
       search:
         index: mytest2
         rest_total_hits_as_int: true
-        body: {"query": { "match_lattice": { "lattices": { "query": "quick jumped", "slop": 0, "slop_seconds": 3.0, "include_span_score": "false", "payload_function": "default", "in_order": "true" } } } }
+        body: {"query": { "match_lattice": { "lattices": { "query": "quick jumped", "slop": 0, "slop_seconds": 3.0, "include_span_score": "false", "payload_function": "sum", "in_order": "true" } } } }
 
   - match: {hits.total: 1}
 
@@ -256,7 +256,7 @@
       search:
         index: mytest2
         rest_total_hits_as_int: true
-        body: {"query": { "match_lattice": { "lattices": { "query": "quick jumped", "slop": 0, "slop_seconds": 2.9, "include_span_score": "false", "payload_function": "default", "in_order": "true" } } } }
+        body: {"query": { "match_lattice": { "lattices": { "query": "quick jumped", "slop": 0, "slop_seconds": 2.9, "include_span_score": "false", "payload_function": "sum", "in_order": "true" } } } }
 
   - match: {hits.total: 0}
 
@@ -264,7 +264,7 @@
       search:
         index: mytest2
         rest_total_hits_as_int: true
-        body: {"query": { "match_lattice": { "lattices": { "query": "jumped quick", "slop": 100, "slop_seconds": 4000, "include_span_score": "false", "payload_function": "default", "in_order": "true" } } } }
+        body: {"query": { "match_lattice": { "lattices": { "query": "jumped quick", "slop": 100, "slop_seconds": 4000, "include_span_score": "false", "payload_function": "sum", "in_order": "true" } } } }
 
   - match: {hits.total: 0}
 
@@ -272,7 +272,7 @@
       search:
         index: mytest2
         rest_total_hits_as_int: true
-        body: {"query": { "match_lattice": { "lattices": { "query": "fox box", "slop": 100, "slop_seconds": 4000, "include_span_score": "false", "payload_function": "default", "in_order": "true" } } } }
+        body: {"query": { "match_lattice": { "lattices": { "query": "fox box", "slop": 100, "slop_seconds": 4000, "include_span_score": "false", "payload_function": "sum", "in_order": "true" } } } }
 
   - match: {hits.total: 0}
 

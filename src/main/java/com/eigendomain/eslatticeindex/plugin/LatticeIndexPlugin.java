@@ -16,8 +16,8 @@ package com.eigendomain.eslatticeindex.plugin;
 
 
 import com.eigendomain.eslatticeindex.index.LatticeTokenFilterFactory;
-import com.eigendomain.eslatticeindex.index.MyWhiteSpaceTokenizerFactory;
-import com.eigendomain.eslatticeindex.index.query.LatticeQueryBuilder;
+import com.eigendomain.eslatticeindex.index.LatticeWhiteSpaceTokenizerFactory;
+import com.eigendomain.eslatticeindex.index.query.MatchLatticeQueryBuilder;
 import com.eigendomain.eslatticeindex.mapper.LatticeFieldMapper;
 import org.elasticsearch.index.analysis.TokenFilterFactory;
 import org.elasticsearch.index.analysis.TokenizerFactory;
@@ -45,7 +45,7 @@ public class LatticeIndexPlugin extends Plugin implements AnalysisPlugin, Search
     }
 
     public Map<String, AnalysisProvider<TokenizerFactory>> getTokenizers() {
-        return Collections.singletonMap("my_whitespace", MyWhiteSpaceTokenizerFactory::new);
+        return Collections.singletonMap("lattice_whitespace", LatticeWhiteSpaceTokenizerFactory::new);
     }
 
     @Override
@@ -53,8 +53,8 @@ public class LatticeIndexPlugin extends Plugin implements AnalysisPlugin, Search
         return singletonList(
                 new QuerySpec<>(
                         "match_lattice",
-                        LatticeQueryBuilder::new,
-                        LatticeQueryBuilder::fromXContent)
+                        MatchLatticeQueryBuilder::new,
+                        MatchLatticeQueryBuilder::fromXContent)
         );
     }
 

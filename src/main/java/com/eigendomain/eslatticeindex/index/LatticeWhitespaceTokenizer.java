@@ -29,12 +29,12 @@ import org.apache.lucene.util.AttributeFactory;
  *
  * @see UnicodeWhitespaceTokenizer
  */
-public final class MyWhitespaceTokenizer extends CharTokenizer {
+public final class LatticeWhitespaceTokenizer extends CharTokenizer {
 
     /**
      * Construct a new WhitespaceTokenizer.
      */
-    public MyWhitespaceTokenizer() {
+    public LatticeWhitespaceTokenizer() {
     }
 
     /**
@@ -44,7 +44,7 @@ public final class MyWhitespaceTokenizer extends CharTokenizer {
      * @param factory
      *          the attribute factory to use for this {@link Tokenizer}
      */
-    public MyWhitespaceTokenizer(AttributeFactory factory) {
+    public LatticeWhitespaceTokenizer(AttributeFactory factory) {
         super(factory);
     }
 
@@ -57,7 +57,7 @@ public final class MyWhitespaceTokenizer extends CharTokenizer {
      *        Must be greater than 0 and less than MAX_TOKEN_LENGTH_LIMIT (1024*1024)
      * @throws IllegalArgumentException if maxTokenLen is invalid.
      */
-    public MyWhitespaceTokenizer(AttributeFactory factory, int maxTokenLen) {
+    public LatticeWhitespaceTokenizer(AttributeFactory factory, int maxTokenLen) {
         super(factory, maxTokenLen);
     }
 

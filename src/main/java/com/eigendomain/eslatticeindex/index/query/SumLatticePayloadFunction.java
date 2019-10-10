@@ -17,7 +17,7 @@
 
 package com.eigendomain.eslatticeindex.index.query;
 
-public class DefaultLatticePayloadFunction extends LatticePayloadScoreFuction {
+public class SumLatticePayloadFunction extends LatticePayloadScoreFuction {
     protected static final float MIN_SCORE = 10e-7f;
     protected static final float MIN_LOG_SCORE = (float)Math.log(MIN_SCORE);
     protected static final float SCORE_MULT = (float)Math.log(10e4);
@@ -56,7 +56,7 @@ public class DefaultLatticePayloadFunction extends LatticePayloadScoreFuction {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof DefaultLatticePayloadFunction)) {
+        if (!(o instanceof SumLatticePayloadFunction)) {
             return false;
         }
         return true;

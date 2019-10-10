@@ -20,14 +20,14 @@ import org.elasticsearch.env.Environment;
 import org.elasticsearch.index.IndexSettings;
 import org.elasticsearch.index.analysis.AbstractTokenizerFactory;
 
-public class MyWhiteSpaceTokenizerFactory extends AbstractTokenizerFactory {
+public class LatticeWhiteSpaceTokenizerFactory extends AbstractTokenizerFactory {
 
-    public MyWhiteSpaceTokenizerFactory(IndexSettings indexSettings, Environment environment, String s, Settings settings) {
+    public LatticeWhiteSpaceTokenizerFactory(IndexSettings indexSettings, Environment environment, String s, Settings settings) {
         super(indexSettings, settings);
     }
 
     @Override
     public Tokenizer create() {
-        return new MyWhitespaceTokenizer();
+        return new LatticeWhitespaceTokenizer();
     }
 }

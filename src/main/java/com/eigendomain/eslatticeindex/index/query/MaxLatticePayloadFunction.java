@@ -17,7 +17,7 @@
 
 package com.eigendomain.eslatticeindex.index.query;
 
-public class MaxLatticePayloadFunction extends DefaultLatticePayloadFunction {
+public class MaxLatticePayloadFunction extends SumLatticePayloadFunction {
     @Override
     public float spanScore(int docId, String field, int start, int end, int width, int numPayloadsSeen,
                            float currentScore, float currentSpanScore) {
