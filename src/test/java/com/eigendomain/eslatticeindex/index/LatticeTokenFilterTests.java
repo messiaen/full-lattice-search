@@ -18,6 +18,7 @@ import com.eigendomain.eslatticeindex.plugin.LatticeIndexPlugin;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.core.WhitespaceTokenizer;
+import org.apache.lucene.analysis.payloads.PayloadHelper;
 import org.elasticsearch.Version;
 import org.elasticsearch.cluster.metadata.IndexMetaData;
 import org.elasticsearch.common.settings.Settings;
@@ -64,7 +65,32 @@ public class LatticeTokenFilterTests extends ESTokenStreamTestCase {
         try (TokenStream in = tokenFilter.create(tokenizer)) {
             String[] tokens = new String[]{"the", "quick", "brick", "brown" ,"fox", "box"};
             int[] posIncs = new int[]{1, 1, 0, 1, 1, 0};
-            assertTokenStreamContents(in, tokens, posIncs);
+            byte[] encode03 = PayloadHelper.encodeFloat(0.3f);
+            byte[] encode09 = PayloadHelper.encodeFloat(0.9f);
+            byte[] encode001 = PayloadHelper.encodeFloat(0.01f);
+            byte[] encode10 = PayloadHelper.encodeFloat(1.0f);
+            byte[] encode07 = PayloadHelper.encodeFloat(0.7f);
+            byte[] encode02 = PayloadHelper.encodeFloat(0.2f);
+            byte[][] payloads = new byte[][]{
+                    encode03,
+                    encode09, encode001,
+                    encode10,
+                    encode07, encode02
+            };
+            assertTokenStreamContents(
+                    in,
+                    tokens,
+                    null,
+                    null,
+                    null,
+                    posIncs,
+                    null,
+                    null,
+                    null,
+                    null,
+                    true,
+                    payloads
+            );
         }
     }
 
@@ -86,7 +112,32 @@ public class LatticeTokenFilterTests extends ESTokenStreamTestCase {
                     1, 0, 0, 0, 0, 0,
                     1, 0, 0, 0, 0,
                     1, 0, 0, 0, 0};
-            assertTokenStreamContents(in, tokens, posIncs);
+            byte[] encode03 = PayloadHelper.encodeFloat(0.3f);
+            byte[] encode09 = PayloadHelper.encodeFloat(0.9f);
+            byte[] encode001 = PayloadHelper.encodeFloat(0.01f);
+            byte[] encode10 = PayloadHelper.encodeFloat(1.0f);
+            byte[] encode07 = PayloadHelper.encodeFloat(0.7f);
+            byte[] encode02 = PayloadHelper.encodeFloat(0.2f);
+            byte[][] payloads = new byte[][]{
+                    encode03, encode03,
+                    encode09, encode09, encode09, encode09, encode09, encode001,
+                    encode10, encode10, encode10, encode10, encode10,
+                    encode07, encode07, encode07, encode02, encode02
+            };
+            assertTokenStreamContents(
+                    in,
+                    tokens,
+                    null,
+                    null,
+                    null,
+                    posIncs,
+                    null,
+                    null,
+                    null,
+                    null,
+                    true,
+                    payloads
+            );
         }
     }
 
@@ -112,7 +163,32 @@ public class LatticeTokenFilterTests extends ESTokenStreamTestCase {
                     10, 0, 0, 0, 0, 0,
                     15, 0, 0, 0, 0,
                     5, 0, 0, 0, 0};
-            assertTokenStreamContents(in, tokens, posIncs);
+            byte[] encode03 = PayloadHelper.encodeFloat(0.3f);
+            byte[] encode09 = PayloadHelper.encodeFloat(0.9f);
+            byte[] encode001 = PayloadHelper.encodeFloat(0.01f);
+            byte[] encode10 = PayloadHelper.encodeFloat(1.0f);
+            byte[] encode07 = PayloadHelper.encodeFloat(0.7f);
+            byte[] encode02 = PayloadHelper.encodeFloat(0.2f);
+            byte[][] payloads = new byte[][]{
+                    encode03, encode03,
+                    encode09, encode09, encode09, encode09, encode09, encode001,
+                    encode10, encode10, encode10, encode10, encode10,
+                    encode07, encode07, encode07, encode02, encode02
+            };
+            assertTokenStreamContents(
+                    in,
+                    tokens,
+                    null,
+                    null,
+                    null,
+                    posIncs,
+                    null,
+                    null,
+                    null,
+                    null,
+                    true,
+                    payloads
+            );
         }
     }
 
