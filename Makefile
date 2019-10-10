@@ -8,7 +8,7 @@ COMMIT_HASH = $(shell grep COMMIT_HASH .env | cut -d '=' -f 2)
 NAME = "registry.gitlab.com/hedgehogai/full-lattice-search/full-lattice-search"
 IMAGE_VERSION = $(VERSION)-$(ES_VERSION)
 
-default: build_plugin
+default: build
 
 clean:
 	./gradlew clean
@@ -27,6 +27,7 @@ push:
 test:
 	./gradlew cleanTest test
 
+.PHONY: build
 build:
 	./gradlew build
 
