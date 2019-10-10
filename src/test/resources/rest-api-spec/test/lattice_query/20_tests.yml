@@ -1,0 +1,106 @@
+"placeholder":
+  - do:
+      indices.create:
+        index: "mytest"
+        body:
+          settings:
+            number_of_shards: "1"
+            number_of_replicas: "0"
+            analysis:
+              tokenizer:
+                ws:
+                  type: my_whitespace
+              analyzer:
+                lat_ana:
+                  type: custom
+                  tokenizer: ws
+                  filter: ["lat_filter", "lowercase"]
+              filter:
+                lat_filter:
+                  type: lattice
+                  lattice_format: "audio"
+                  audio_position_increment_seconds: "0.5"
+          mappings:
+            properties:
+              lattices:
+                type: lattice
+                lattice_format: audio
+                audio_position_increment_seconds: "0.5"
+                analyzer: lat_ana
+                term_vector: with_positions_offsets_payloads
+
+  - do:
+      indices.create:
+        index: "mytest2"
+        body:
+          settings:
+            number_of_shards: "1"
+            number_of_replicas: "0"
+            analysis:
+              tokenizer:
+                ws:
+                  type: my_whitespace
+              analyzer:
+                lat_ana:
+                  type: custom
+                  tokenizer: ws
+                  filter: ["lat_filter", "lowercase"]
+              filter:
+                lat_filter:
+                  type: lattice
+                  lattice_format: "audio"
+                  audio_position_increment_seconds: "0.1"
+          mappings:
+            properties:
+              lattices:
+                type: lattice
+                lattice_format: audio
+                audio_position_increment_seconds: "0.1"
+                analyzer: lat_ana
+                term_vector: with_positions_offsets_payloads
+
+  - do:
+      index:
+        index: "mytest"
+        body:
+          lattices: "quick|0|0|1.0|0.0|0.5 brown|1|0|1.0|1.5|1.7 fox|2|0|1.0|2.5|3.0 box|2|0|1.0|2.5|3.0 jumped|3|0|1.0|3.0|3.7"
+        refresh: true
+
+  - do:
+      index:
+        index: "mytest2"
+        body:
+          lattices: "quick|0|0|1.0|0.0|0.5 brown|1|0|1.0|1.5|1.7 fox|2|0|1.0|2.5|3.0 box|2|0|1.0|2.5|3.0 jumped|3|0|1.0|3.0|3.7"
+        refresh: true
+
+  - do:
+      search:
+        index: mytest
+        rest_total_hits_as_int: true
+        body: {"query": { "match_lattice": { "lattices": { "query": "quick brown fox jumped", "slop": 0, "slop_seconds": 3.0, "include_span_score": "false", "payload_function": "default", "in_order": "true" } } } }
+
+  - match: {hits.total: 1}
+
+  - do:
+      search:
+        index: mytest
+        rest_total_hits_as_int: true
+        body: {"query": { "match_lattice": { "lattices": { "query": "quick brown fox jumped", "slop": 0, "slop_seconds": 2.9, "include_span_score": "false", "payload_function": "default", "in_order": "true" } } } }
+
+  - match: {hits.total: 0}
+
+  - do:
+      search:
+        index: mytest2
+        rest_total_hits_as_int: true
+        body: {"query": { "match_lattice": { "lattices": { "query": "quick brown fox jumped", "slop": 0, "slop_seconds": 3.0, "include_span_score": "false", "payload_function": "default", "in_order": "true" } } } }
+
+  - match: {hits.total: 1}
+
+  - do:
+      search:
+        index: mytest2
+        rest_total_hits_as_int: true
+        body: {"query": { "match_lattice": { "lattices": { "query": "quick brown fox jumped", "slop": 0, "slop_seconds": 2.9, "include_span_score": "false", "payload_function": "default", "in_order": "true" } } } }
+
+  - match: {hits.total: 0}

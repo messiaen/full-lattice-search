@@ -16,9 +16,11 @@ package com.eigendomain.eslatticeindex.plugin;
 
 
 import com.eigendomain.eslatticeindex.index.LatticeTokenFilterFactory;
+import com.eigendomain.eslatticeindex.index.MyWhiteSpaceTokenizerFactory;
 import com.eigendomain.eslatticeindex.index.query.LatticeQueryBuilder;
 import com.eigendomain.eslatticeindex.mapper.LatticeFieldMapper;
 import org.elasticsearch.index.analysis.TokenFilterFactory;
+import org.elasticsearch.index.analysis.TokenizerFactory;
 import org.elasticsearch.index.mapper.Mapper;
 import org.elasticsearch.indices.analysis.AnalysisModule.AnalysisProvider;
 import org.elasticsearch.plugins.AnalysisPlugin;
@@ -40,6 +42,10 @@ public class LatticeIndexPlugin extends Plugin implements AnalysisPlugin, Search
         return new HashMap<String, AnalysisProvider<TokenFilterFactory>>(){{
             put("lattice", LatticeTokenFilterFactory::new);
         }};
+    }
+
+    public Map<String, AnalysisProvider<TokenizerFactory>> getTokenizers() {
+        return Collections.singletonMap("my_whitespace", MyWhiteSpaceTokenizerFactory::new);
     }
 
     @Override

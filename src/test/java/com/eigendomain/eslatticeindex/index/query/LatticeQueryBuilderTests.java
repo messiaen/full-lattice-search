@@ -22,6 +22,7 @@ import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexOrDocValuesQuery;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.MatchNoDocsQuery;
+import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.PointRangeQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
@@ -102,6 +103,7 @@ public class LatticeQueryBuilderTests extends AbstractQueryTestCase<LatticeQuery
         }
 
         assertThat(query, CoreMatchers.either(instanceOf(BooleanQuery.class))
+                .or(instanceOf(PhraseQuery.class))
                 .or(instanceOf(LatticePayloadScoreQuery.class))
                 .or(instanceOf(PointRangeQuery.class))
                 .or(instanceOf(IndexOrDocValuesQuery.class))
