@@ -16,13 +16,11 @@ package com.eigendomain.eslatticeindex.index.query;
 
 import org.elasticsearch.test.ESTestCase;
 import org.junit.Assert;
-//import org.junit.Test;
 
 public class SumLatticePayloadFunctionTests extends ESTestCase {
 
-    //@Test
     public void testSpanScore() {
-        LatticePayloadScoreFuction function = new SumLatticePayloadFunction();
+        LatticePayloadScoreFunction function = new SumLatticePayloadFunction(1.0f);
         int start = 1;
         int end = 3;
         float currentScore = 0;
@@ -32,9 +30,19 @@ public class SumLatticePayloadFunctionTests extends ESTestCase {
         Assert.assertEquals(expected, actual, 1);
     }
 
-    //@Test
+    public void testSpanScoreLenNorm() {
+        LatticePayloadScoreFunction function = new SumLatticePayloadFunction(0.5f);
+        int start = 1;
+        int end = 3;
+        float currentScore = 0;
+
+        float expected = 3000.0f;
+        float actual = function.spanScore(0, "", start, end, 0, 0, 0, -3.506f);
+        Assert.assertEquals(expected, actual, 2);
+    }
+
     public void testCurrentLeafScore() {
-        LatticePayloadScoreFuction function = new SumLatticePayloadFunction();
+        LatticePayloadScoreFunction function = new SumLatticePayloadFunction(1.0f);
         int start = 1;
         int end = 2;
         float currentScore = 0;
@@ -52,9 +60,8 @@ public class SumLatticePayloadFunctionTests extends ESTestCase {
         Assert.assertEquals(expected, actual, 0.000001f);
     }
 
-    //@Test
     public void testDocScore() {
-        LatticePayloadScoreFuction function = new SumLatticePayloadFunction();
+        LatticePayloadScoreFunction function = new SumLatticePayloadFunction(1.0f);
 
         float expected = SumLatticePayloadFunction.MIN_SCORE;
         float actual = function.docScore(0, "", 0, 0.9987f);

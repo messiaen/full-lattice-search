@@ -143,6 +143,7 @@ public class MatchLatticeQueryBuilderTests extends AbstractQueryTestCase<MatchLa
                 "      \"in_order\" : true,\n" +
                 "      \"include_span_score\" : true,\n" +
                 "      \"payload_function\" : \"sum\",\n" +
+                "      \"payload_length_norm_factor\" : 1.0,\n" +
                 "      \"boost\" : 1.0\n" +
                 "    }\n" +
                 "  }\n" +
@@ -162,6 +163,7 @@ public class MatchLatticeQueryBuilderTests extends AbstractQueryTestCase<MatchLa
                 "      \"in_order\" : false,\n" +
                 "      \"include_span_score\" : false,\n" +
                 "      \"payload_function\" : \"max\",\n" +
+                "      \"payload_length_norm_factor\" : 0.5,\n" +
                 "      \"boost\" : 1.0\n" +
                 "    }\n" +
                 "  }\n" +

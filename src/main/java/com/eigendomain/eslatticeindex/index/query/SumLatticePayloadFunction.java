@@ -17,17 +17,23 @@
 
 package com.eigendomain.eslatticeindex.index.query;
 
-public class SumLatticePayloadFunction extends LatticePayloadScoreFuction {
+public class SumLatticePayloadFunction extends LatticePayloadScoreFunction {
     protected static final float MIN_SCORE = 10e-7f;
     protected static final float MIN_LOG_SCORE = (float)Math.log(MIN_SCORE);
     protected static final float SCORE_MULT = (float)Math.log(10e4);
+
+    public SumLatticePayloadFunction(float lengthNormalizationFactor) {
+        super(lengthNormalizationFactor);
+    }
 
     @Override
     public float spanScore(int docId, String field, int start, int end, int width, int numPayloadsSeen,
                            float currentScore, float currentSpanScore) {
         // the scores are normalized by the length of the span
         // this incorporates that number of tokens in the query plus the number of skipped tokens
-        return currentScore + (float)Math.exp((SCORE_MULT + currentSpanScore) - Math.log(end - start));
+        return currentScore
+                + (float)Math.exp(
+                        (SCORE_MULT + currentSpanScore) - Math.log((end - start) * lengthNormalizationFactor()));
     }
 
     @Override
@@ -57,6 +63,11 @@ public class SumLatticePayloadFunction extends LatticePayloadScoreFuction {
             return true;
         }
         if (!(o instanceof SumLatticePayloadFunction)) {
+            return false;
+        }
+
+        SumLatticePayloadFunction other = (SumLatticePayloadFunction) o;
+        if (this.lengthNormalizationFactor() != other.lengthNormalizationFactor()) {
             return false;
         }
         return true;

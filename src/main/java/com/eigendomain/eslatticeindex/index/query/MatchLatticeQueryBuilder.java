@@ -62,12 +62,14 @@ public class MatchLatticeQueryBuilder extends AbstractQueryBuilder<MatchLatticeQ
     public static final float DEFAULT_SLOP_SECS = 3.0f;
     public static final float DEFAULT_PHRASE_GAP = 0.16f;
     private static final PayloadDecoder FLOAT_DECODER = new FloatDecoder(1.0f);
+    private static final float DEFAULT_LEN_NORM = 1.0f;
 
     private final String fieldName;
     private final Object value;
 
     private String analyzerString = null;
     private String payloadFuncString = "sum";
+    private float payloadLenNormFactor = 1.0f;
     private boolean includeSpanScore = true;
     private boolean inOrder = true;
     private int slop = DEFAULT_SLOP;
@@ -75,7 +77,7 @@ public class MatchLatticeQueryBuilder extends AbstractQueryBuilder<MatchLatticeQ
 
     private MatchQuery.ZeroTermsQuery zeroTermsQuery = MatchQuery.DEFAULT_ZERO_TERMS_QUERY;
 
-    private LatticePayloadScoreFuction payloadFunction = new SumLatticePayloadFunction();
+    private LatticePayloadScoreFunction payloadFunction = new SumLatticePayloadFunction(1.0f);
     private PayloadDecoder payloadDecoder = new FloatDecoder(1.0f);
 
     private static final ParseField SLOP_FIELD = new ParseField("slop");
@@ -83,6 +85,7 @@ public class MatchLatticeQueryBuilder extends AbstractQueryBuilder<MatchLatticeQ
     private static final ParseField IN_ORDER_FIELD = new ParseField("in_order");
     private static final ParseField INCLUDE_SPAN_SCORE_FIELD = new ParseField("include_span_score");
     private static final ParseField PAYLOAD_FUNCTION_FIELD = new ParseField("payload_function");
+    private static final ParseField PAYLOAD_LEN_NORM_FIELD = new ParseField("payload_length_norm_factor");
 
     public MatchLatticeQueryBuilder(String fieldName, Object value) {
         super();
@@ -106,19 +109,20 @@ public class MatchLatticeQueryBuilder extends AbstractQueryBuilder<MatchLatticeQ
         this.inOrder = in.readBoolean();
         this.includeSpanScore = in.readBoolean();
         this.payloadFuncString = in.readString();
+        this.payloadLenNormFactor = in.readFloat();
         this.zeroTermsQuery = MatchQuery.ZeroTermsQuery.readFromStream(in);
 
         this.analyzerString = in.readOptionalString();
     }
 
-    private static LatticePayloadScoreFuction parsePayloadFuncString(String name) {
+    private static LatticePayloadScoreFunction parsePayloadFuncString(String name, float lenNormFactor) {
         switch(name) {
             case "sum":
-                return new SumLatticePayloadFunction();
+                return new SumLatticePayloadFunction(lenNormFactor);
             case "max":
-                return new MaxLatticePayloadFunction();
+                return new MaxLatticePayloadFunction(lenNormFactor);
             case "min":
-                return new MinLatticePayloadFunction();
+                return new MinLatticePayloadFunction(lenNormFactor);
         }
         throw new IllegalArgumentException("Invalid payload function: " + name);
     }
@@ -128,6 +132,15 @@ public class MatchLatticeQueryBuilder extends AbstractQueryBuilder<MatchLatticeQ
             return new FloatDecoder(payloadScale);
         }
             throw new IllegalArgumentException("Invalid decoder: " + name);
+    }
+
+    public float payloadLengthNormFactor() {
+        return payloadLenNormFactor;
+    }
+
+    public MatchLatticeQueryBuilder payloadLengthNormFactor(float factor) {
+        this.payloadLenNormFactor = factor;
+        return this;
     }
 
     public String fieldName() {
@@ -156,8 +169,8 @@ public class MatchLatticeQueryBuilder extends AbstractQueryBuilder<MatchLatticeQ
         return this.payloadFuncString;
     }
 
-    public LatticePayloadScoreFuction payloadFunction() {
-        return parsePayloadFuncString(payloadFuncString());
+    public LatticePayloadScoreFunction payloadFunction() {
+        return parsePayloadFuncString(payloadFuncString(), payloadLengthNormFactor());
     }
 
     public PayloadDecoder payloadDecoder() {
@@ -218,6 +231,7 @@ public class MatchLatticeQueryBuilder extends AbstractQueryBuilder<MatchLatticeQ
         out.writeBoolean(inOrder);
         out.writeBoolean(includeSpanScore);
         out.writeString(payloadFuncString);
+        out.writeFloat(payloadLenNormFactor);
         zeroTermsQuery.writeTo(out);
 
         out.writeOptionalString(analyzerString);
@@ -239,6 +253,7 @@ public class MatchLatticeQueryBuilder extends AbstractQueryBuilder<MatchLatticeQ
         builder.field(IN_ORDER_FIELD.getPreferredName(), inOrder);
         builder.field(INCLUDE_SPAN_SCORE_FIELD.getPreferredName(), includeSpanScore);
         builder.field(PAYLOAD_FUNCTION_FIELD.getPreferredName(), payloadFuncString);
+        builder.field(PAYLOAD_LEN_NORM_FIELD.getPreferredName(), payloadLenNormFactor);
         printBoostAndQueryName(builder);
         builder.endObject();
         builder.endObject();
@@ -348,13 +363,14 @@ public class MatchLatticeQueryBuilder extends AbstractQueryBuilder<MatchLatticeQ
                 && Objects.equals(zeroTermsQuery, other.zeroTermsQuery)
                 && Objects.equals(inOrder, other.inOrder)
                 && Objects.equals(includeSpanScore, other.includeSpanScore)
-                && Objects.equals(payloadFuncString, other.payloadFuncString);
+                && Objects.equals(payloadFuncString, other.payloadFuncString)
+                && Objects.equals(payloadLenNormFactor, other.payloadLenNormFactor);
     }
 
     @Override
     protected int doHashCode() {
         return Objects.hash(fieldName, analyzerString, value, slop, slopSeconds,
-                includeSpanScore, inOrder, payloadFuncString, zeroTermsQuery);
+                includeSpanScore, inOrder, payloadFuncString, payloadLenNormFactor, zeroTermsQuery);
     }
 
     public static MatchLatticeQueryBuilder fromXContent(XContentParser parser) throws IOException {
@@ -367,6 +383,7 @@ public class MatchLatticeQueryBuilder extends AbstractQueryBuilder<MatchLatticeQ
         boolean inOrder = SpanNearQueryBuilder.DEFAULT_IN_ORDER;
         boolean includeSpanScore = true;
         String payloadFunc = "sum";
+        float lenNorm = DEFAULT_LEN_NORM;
         String fieldName = null;
         Object value = null;
         String queryName = null;
@@ -402,6 +419,8 @@ public class MatchLatticeQueryBuilder extends AbstractQueryBuilder<MatchLatticeQ
                             includeSpanScore = parser.booleanValue();
                         } else if (PAYLOAD_FUNCTION_FIELD.match(currentFieldName, parser.getDeprecationHandler())) {
                             payloadFunc = parser.text();
+                        } else if (PAYLOAD_LEN_NORM_FIELD.match(currentFieldName, parser.getDeprecationHandler())) {
+                            lenNorm = parser.floatValue();
                         } else if (MatchPhraseQueryBuilder.ZERO_TERMS_QUERY_FIELD.match(currentFieldName, parser.getDeprecationHandler())) {
                             String zeroTermsValue = parser.text();
                             if ("none".equalsIgnoreCase(zeroTermsValue)) {
@@ -438,6 +457,7 @@ public class MatchLatticeQueryBuilder extends AbstractQueryBuilder<MatchLatticeQ
         builder.queryName(queryName);
         builder.includeSpanScore(includeSpanScore);
         builder.payloadFuncString(payloadFunc);
+        builder.payloadLengthNormFactor(lenNorm);
 
         return builder;
     }
