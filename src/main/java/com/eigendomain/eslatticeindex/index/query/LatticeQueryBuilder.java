@@ -32,6 +32,7 @@ import org.apache.lucene.search.spans.SpanQuery;
 import org.apache.lucene.search.spans.SpanTermQuery;
 import org.elasticsearch.common.ParseField;
 import org.elasticsearch.common.ParsingException;
+import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
 import org.elasticsearch.common.lucene.Lucene;
@@ -60,13 +61,13 @@ public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilde
     public static final int DEFAULT_SLOP = MatchQuery.DEFAULT_PHRASE_SLOP;
     public static final float DEFAULT_SLOP_SECS = 3.0f;
     public static final float DEFAULT_PHRASE_GAP = 0.16f;
+    private static final PayloadDecoder FLOAT_DECODER = new FloatDecoder(1.0f);
 
     private final String fieldName;
     private final Object value;
 
     private String analyzerString = null;
     private String payloadFuncString = "default";
-    private String payloadDecoderString = "float";
     private boolean includeSpanScore = true;
     private boolean inOrder = true;
     private int slop = DEFAULT_SLOP;
@@ -75,7 +76,7 @@ public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilde
     private MatchQuery.ZeroTermsQuery zeroTermsQuery = MatchQuery.DEFAULT_ZERO_TERMS_QUERY;
 
     private LatticePayloadScoreFuction payloadFunction = new DefaultLatticePayloadFunction();
-    private PayloadDecoder payloadDecoder = PayloadDecoder.FLOAT_DECODER;
+    private PayloadDecoder payloadDecoder = new FloatDecoder(1.0f);
 
     private static final ParseField SLOP_FIELD = new ParseField("slop");
     private static final ParseField SLOP_SECS_FIELD = new ParseField("slop_seconds");
@@ -85,6 +86,12 @@ public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilde
 
     public LatticeQueryBuilder(String fieldName, Object value) {
         super();
+        if (Strings.isEmpty(fieldName)) {
+            throw new IllegalArgumentException("[" + NAME + "] requires fieldName");
+        }
+        if (null == value) {
+            throw new IllegalArgumentException("[" + NAME + "] requires query value");
+        }
         this.fieldName = fieldName;
         this.value = value;
     }
@@ -95,10 +102,11 @@ public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilde
         this.fieldName = in.readString();
         this.value = in.readGenericValue();
         this.slop = in.readVInt();
+        this.slopSeconds = in.readFloat();
         this.inOrder = in.readBoolean();
         this.includeSpanScore = in.readBoolean();
         this.payloadFuncString = in.readString();
-        this.payloadDecoderString = in.readString();
+        this.zeroTermsQuery = MatchQuery.ZeroTermsQuery.readFromStream(in);
 
         this.analyzerString = in.readOptionalString();
     }
@@ -144,22 +152,16 @@ public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilde
         return this;
     }
 
-    public LatticeQueryBuilder payloadFunction(LatticePayloadScoreFuction f) {
-        this.payloadFunction = f;
-        return this;
+    public String payloadFuncString() {
+        return this.payloadFuncString;
     }
 
     public LatticePayloadScoreFuction payloadFunction() {
-        return this.payloadFunction;
+        return parsePayloadFuncString(payloadFuncString());
     }
 
     public PayloadDecoder payloadDecoder() {
-       return this.payloadDecoder;
-    }
-
-    public LatticeQueryBuilder payloadDecoder(PayloadDecoder decoder) {
-        this.payloadDecoder = decoder;
-        return this;
+       return FLOAT_DECODER;
     }
 
     public boolean includeSpanScore() {
@@ -188,11 +190,6 @@ public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilde
         return slopSeconds;
     }
 
-    public LatticeQueryBuilder payloadDecoderString(String payloadDecoderString) {
-        this.payloadDecoderString = payloadDecoderString;
-        return this;
-    }
-
     public LatticeQueryBuilder includeSpanScore(boolean includeSpanScore) {
         this.includeSpanScore = includeSpanScore;
         return this;
@@ -217,10 +214,11 @@ public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilde
         out.writeString(fieldName);
         out.writeGenericValue(value);
         out.writeVInt(slop);
+        out.writeFloat(slopSeconds);
         out.writeBoolean(inOrder);
         out.writeBoolean(includeSpanScore);
         out.writeString(payloadFuncString);
-        out.writeString(payloadDecoderString);
+        zeroTermsQuery.writeTo(out);
 
         out.writeOptionalString(analyzerString);
 
@@ -236,6 +234,7 @@ public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilde
         }
 
         builder.field(SLOP_FIELD.getPreferredName(), slop);
+        builder.field(SLOP_SECS_FIELD.getPreferredName(), slopSeconds);
         builder.field(MatchPhraseQueryBuilder.ZERO_TERMS_QUERY_FIELD.getPreferredName(), zeroTermsQuery.toString());
         builder.field(IN_ORDER_FIELD.getPreferredName(), inOrder);
         builder.field(INCLUDE_SPAN_SCORE_FIELD.getPreferredName(), includeSpanScore);
@@ -248,7 +247,7 @@ public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilde
     @Override
     protected Query doToQuery(QueryShardContext context) throws IOException {
         if (analyzerString != null && context.getIndexAnalyzers().get(analyzerString) == null) {
-            throw new QueryShardException(context, "[" + NAME + "] analyzerString [" + analyzerString + "] not found");
+            throw new QueryShardException(context, "[" + NAME + "] analyzer [" + analyzerString + "] not found");
         }
 
         Analyzer analyzer = null;
@@ -308,9 +307,9 @@ public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilde
         if (termQueries.size() == 1) {
            return new LatticePayloadScoreQuery(
                    termQueries.get(0),
-                   this.payloadFunction,
-                   this.payloadDecoder,
-                   this.includeSpanScore);
+                   this.payloadFunction(),
+                   this.payloadDecoder(),
+                   this.includeSpanScore());
         }
 
         int numTerms = termQueries.size();
@@ -329,7 +328,7 @@ public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilde
             builder.addClause(tq);
         }
         final SpanQuery spanQuery = builder.build();
-        return new LatticePayloadScoreQuery(spanQuery, this.payloadFunction, this.payloadDecoder, this.includeSpanScore);
+        return new LatticePayloadScoreQuery(spanQuery, this.payloadFunction(), this.payloadDecoder(), this.includeSpanScore());
     }
 
     private int secsToSlop(float posIncSecs, int numTerms) {
@@ -349,14 +348,13 @@ public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilde
                 && Objects.equals(zeroTermsQuery, other.zeroTermsQuery)
                 && Objects.equals(inOrder, other.inOrder)
                 && Objects.equals(includeSpanScore, other.includeSpanScore)
-                && Objects.equals(payloadDecoder, other.payloadDecoder)
-                && Objects.equals(payloadFunction, other.payloadFunction);
+                && Objects.equals(payloadFuncString, other.payloadFuncString);
     }
 
     @Override
     protected int doHashCode() {
         return Objects.hash(fieldName, analyzerString, value, slop, slopSeconds,
-                includeSpanScore, inOrder, payloadDecoder, payloadFunction);
+                includeSpanScore, inOrder, payloadFuncString, zeroTermsQuery);
     }
 
     public static LatticeQueryBuilder fromXContent(XContentParser parser) throws IOException {
@@ -366,7 +364,6 @@ public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilde
         float boost = AbstractQueryBuilder.DEFAULT_BOOST;
         int slop = DEFAULT_SLOP;
         float slopSeconds = DEFAULT_SLOP_SECS;
-        float phraseGap = DEFAULT_PHRASE_GAP;
         boolean inOrder = SpanNearQueryBuilder.DEFAULT_IN_ORDER;
         boolean includeSpanScore = true;
         String payloadFunc = "default";
@@ -440,8 +437,7 @@ public class LatticeQueryBuilder extends AbstractQueryBuilder<LatticeQueryBuilde
         builder.analyzerString(analyzer);
         builder.queryName(queryName);
         builder.includeSpanScore(includeSpanScore);
-        builder.payloadFunction(parsePayloadFuncString(payloadFunc));
-        builder.payloadDecoder(new FloatDecoder());
+        builder.payloadFuncString(payloadFunc);
 
         return builder;
     }
