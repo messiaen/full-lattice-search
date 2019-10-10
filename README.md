@@ -72,3 +72,39 @@ Parameters include:
 - `audio_position_increment_seconds` (default is 0.01)
   - for `lattice=format=audio` this is the precision at which the audio times are encoded into position in the index
   - position of a token will be `floor(token_start_time / audio_position_increment_seconds)`
+ 
+ ### LatticeField
+ 
+A field of type `lattice` holds parameters of LatticeTokenFilter for reference at search time. Functions like a `text`
+field.
+
+**If you use `lattice_format=audio` you need to use this fields type for query to work correctly with times.**
+
+**Note:** this only exists because currently there does not seem to be a way to get the necessary (or any) information
+from the analyzer at query time.  I think there could be a `getChainAware()` or similar method added to `AnalysisProvider`
+functioning similar to `SynonymGraphTokenFilterFactory.getChainAwareTokenFilterFactory()` within `AnalysisRegistry`.
+
+Parameters include:
+- `lattice_format` must match the configuration of the `LatticeTokenFilter` set on this field.
+- `audio_position_increment_seconds` must match the configuration of the `LatticeTokenFilter` set on this field.
+
+### MatchLatticeQuery
+
+A query of type `match_lattice` queries a `lattice` field configured with a `lattice` token filter.
+
+Performs a `SpanNearQuery` wrapped in a `LatticePayloadScoreQuery` (extension of `PayloadScoreQuery`), which uses the
+scores encoded in each token payload to score matching spans. The score from each span is summed to give the document
+score.  If `include_span_score` is set, the score above is multiplied by the configured similarity score.
+
+Parameters include:
+- `slop` number of skipped tokens allowed in match
+- `slop_seconds` used when `lattice_format=audio`. Maximum seconds the match is allowed to span.
+- `in_order` whether the token must appear in order (should be `true` for `lattice_format=audio`)
+- `include_span_score` if `true` the configured similarity score will be multiplied with the payload score (described above)
+- `payload_function` one of `sum`, `max`, or `min`
+  - `sum` sums the scores of matching spans
+  - `max` selects the max score from all the matching spans
+  - `min` selects the min score from all the matching spans
+- `payload_length_norm_factor` a float defining how much the length of the matching span should normalize the span score.
+  A value of one means that score are divided by the length of the span (Note this in not the width of the span in lucene terms).
+  A value of 0 means there is no length normalization.
