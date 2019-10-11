@@ -1,5 +1,13 @@
 # Full Lattice Search
 
+## Full Text Search Over Probabilistic Lattices
+
+### Like this one!
+
+![Location aligned lattice example](/doc/fst_examples/title_example.png)
+
+### With [Elasticsearch](https://github.com/elastic/elasticsearch)!!
+
 ## Overview
 
 This [Elasticsearch](https://github.com/elastic/elasticsearch) plugin enables search across probabilistic
@@ -13,9 +21,18 @@ In the case of STT the locations would be time ranges, in the case of OCR the lo
 coordinates, or perhaps a reading order location.  Each possible output has an associated probability of occurrence at
 that location allowing relevance scoring to be affected by the quality of the lattice output.
 
-![Location aligned lattice example](/doc/fst_examples/title_example.png)
+#### See [Getting Started](#Getting-Started) to try it out.
 
 ## Plugin
+
+The plugin consists of three components:
+- [LatticeTokenFilter](#LatticeTokenFilter) - A custom token filter to index lattice token streams, 
+  which is designed to be used as a part of an
+  analysis chain.
+- [LatticeField](#LatticeField) - A custom field to store configuration of the LatticeTokenFilter for access at query time.
+  (See the below section on the Lattice field to an explanation as to why this is necessary)
+- [MatchLatticeQuery](#MatchLatticeQuery) - A custom query to search [LatticeFields](#LatticeField) analyzed 
+  with [LatticeTokenFilter](#LatticeTokenFilter)
 
 ### LatticeTokenFilter
 A token filter of type `lattice` that processes a lattice token stream.
@@ -113,7 +130,7 @@ Parameters include:
   A value of one means that score are divided by the length of the span (Note this in not the width of the span in lucene terms).
   A value of 0 means there is no length normalization.
   
-## Installation
+## Getting Started
 
 ### Development with [docker-compose](https://docs.docker.com/compose/)
 
@@ -148,14 +165,6 @@ volumes:
     driver: local
 ```
 
-### Production
-
-Requires [Elasticsearch 7.3.0](https://www.elastic.co/guide/en/elasticsearch/reference/7.3/install-elasticsearch.html)
-(Support for other versions (>=6.0.0) coming soon / on request)
-
-1. Download the appropriate release from [releases tab](https://github.com/messiaen/full-lattice-search/releases)
-2. Install the plugin using the Elasticsearch docs [here](https://www.elastic.co/guide/en/elasticsearch/plugins/7.4/plugin-management-custom-url.html)
-  or [here](https://www.elastic.co/guide/en/elasticsearch/plugins/7.4/_plugins_directory.html)
  
 ## Example Usage with [Kibana](https://www.elastic.co/guide/en/kibana/current/index.html)
 
@@ -361,3 +370,12 @@ the|0|0|0.9
   }
 }
 ```
+
+## Installation for Production
+
+Requires [Elasticsearch 7.3.0](https://www.elastic.co/guide/en/elasticsearch/reference/7.3/install-elasticsearch.html)
+(Support for other versions (>=6.0.0) coming soon / on request)
+
+1. Download the appropriate release from [releases tab](https://github.com/messiaen/full-lattice-search/releases)
+2. Install the plugin using the Elasticsearch docs [here](https://www.elastic.co/guide/en/elasticsearch/plugins/7.4/plugin-management-custom-url.html)
+  or [here](https://www.elastic.co/guide/en/elasticsearch/plugins/7.4/_plugins_directory.html)
