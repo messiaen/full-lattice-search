@@ -1,7 +1,5 @@
 # Full Lattice Search
 
-![Location aligned lattice example](/doc/fst_examples/title_example.png)
-
 ## Overview
 
 This [Elasticsearch](https://github.com/elastic/elasticsearch) plugin enables search across probabilistic
@@ -14,6 +12,8 @@ in the source document (e.g. at the first location below, the possible outputs a
 In the case of STT the locations would be time ranges, in the case of OCR the locations could be x y
 coordinates, or perhaps a reading order location.  Each possible output has an associated probability of occurrence at
 that location allowing relevance scoring to be affected by the quality of the lattice output.
+
+![Location aligned lattice example](/doc/fst_examples/title_example.png)
 
 ## Plugin
 
