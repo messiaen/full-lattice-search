@@ -29,6 +29,8 @@ Tokens should be in the form
 
 Example stream: `the|0|0|0.9`,  `quick|1|0|0.6`, `brick|1|1|0.2`, `fox|2|0|0.5`, `box|2|1|0.09`, `jumped|3|0|1.0`
 
+![example1](/doc/fst_examples/example_01.png)
+
 In the example above the tokens `quick` and `brick` will be index at the same location, because they both have position
 set to 1.
 
@@ -48,6 +50,8 @@ Tokens should be in the form
 `<token:string>|<position:int>|<rank:int>|<score:float>|<start_time:float>|<stop_time:float>`
 
 Example stream: `the|0|0|0.9|0.15|0.25`,  `quick|1|0|0.6|0.25|0.5`, `brick|1|1|0.2|0.25|0.5`, `fox|2|0|0.5|1.0|1.3`, `box|2|1|0.09|1.0|1.3`, `jumped|3|0|1.0|2.0|2.5`
+
+![example2](/doc/fst_examples/example_02.png)
 
 In the example above the tokens `quick` and `brick` will be index at the same location, because they both have position
 set to 1.  The actual position of the tokens is determined by the times and `audio_position_increment_seconds`.
@@ -111,13 +115,7 @@ Parameters include:
   
 ## Installation
 
-### Development
-
-#### Docker
-
-`pull messiaen/full-text-search:latest`
-
-The image is the official Elasticsearch with the full-text-search plugin installed
+### Development with [docker-compose](https://docs.docker.com/compose/)
 
 `docker-compose.yaml` example:
 
@@ -131,7 +129,7 @@ services:
     environment:
       ELASTICSEARCH_HOSTS: http://es01:9200
   es01:
-    image: registry.gitlab.com/hedgehogai/full-lattice-search/full-lattice-search:2.0.0-rc2-7.3.0
+    image: messiaen/full-lattice-search:2.0.0-rc2-7.3.0
     environment:
       - node.name=es01
       - discovery.type=single-node
