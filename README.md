@@ -27,7 +27,7 @@ Tokens should be in the form
 
 `<token:string>|<position:int>|<rank:int>|<score:float>`
 
-Example stream: `the|0|0`,  `quick|1|0`, `brick|1|1`, `fox|2|0`, `box|2|1`, `jumped|3|0`
+Example stream: `the|0|0|0.9`,  `quick|1|0|0.6`, `brick|1|1|0.2`, `fox|2|0|0.5`, `box|2|1|0.09`, `jumped|3|0|1.0`
 
 In the example above the tokens `quick` and `brick` will be index at the same location, because they both have position
 set to 1.
@@ -47,7 +47,7 @@ Tokens should be in the form
 
 `<token:string>|<position:int>|<rank:int>|<score:float>|<start_time:float>|<stop_time:float>`
 
-Example stream: `the|0|0|0.15|0.25`,  `quick|1|0|0.25|0.5`, `brick|1|1|0.25|0.5`, `fox|2|0|1.0|1.3`, `box|2|1|1.0|1.3`, `jumped|3|0|2.0|2.5`
+Example stream: `the|0|0|0.9|0.15|0.25`,  `quick|1|0|0.6|0.25|0.5`, `brick|1|1|0.2|0.25|0.5`, `fox|2|0|0.5|1.0|1.3`, `box|2|1|0.09|1.0|1.3`, `jumped|3|0|1.0|2.0|2.5`
 
 In the example above the tokens `quick` and `brick` will be index at the same location, because they both have position
 set to 1.  The actual position of the tokens is determined by the times and `audio_position_increment_seconds`.
@@ -108,3 +108,258 @@ Parameters include:
 - `payload_length_norm_factor` a float defining how much the length of the matching span should normalize the span score.
   A value of one means that score are divided by the length of the span (Note this in not the width of the span in lucene terms).
   A value of 0 means there is no length normalization.
+  
+## Installation
+
+### Development
+
+#### Docker
+
+`pull messiaen/full-text-search:latest`
+
+The image is the official Elasticsearch with the full-text-search plugin installed
+
+`docker-compose.yaml` example:
+
+```yaml
+version: "2"
+services:
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.3.0
+    ports:
+      - 5601:5601
+    environment:
+      ELASTICSEARCH_HOSTS: http://es01:9200
+  es01:
+    image: registry.gitlab.com/hedgehogai/full-lattice-search/full-lattice-search:2.0.0-rc2-7.3.0
+    environment:
+      - node.name=es01
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - esdata01:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+
+volumes:
+  esdata01:
+    driver: local
+```
+
+### Production
+
+Requires [Elasticsearch 7.3.0](https://www.elastic.co/guide/en/elasticsearch/reference/7.3/install-elasticsearch.html)
+(Support for other versions (>=6.0.0) coming soon / on request)
+
+1. Download the appropriate release from [releases tab](https://github.com/messiaen/full-lattice-search/releases)
+2. Install the plugin using the Elasticsearch docs [here](https://www.elastic.co/guide/en/elasticsearch/plugins/7.4/plugin-management-custom-url.html)
+  or [here](https://www.elastic.co/guide/en/elasticsearch/plugins/7.4/_plugins_directory.html)
+ 
+## Example Usage with [Kibana](https://www.elastic.co/guide/en/kibana/current/index.html)
+
+### Usage with audio transcripts with times
+
+```
+PUT audio_lattices
+{
+  "settings": {
+    "index": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "analysis": {
+      "analyzer": {
+        "lattice_analyzer": {
+          "type": "custom",
+          "tokenizer": "whitespace",
+          "filter": ["lattice_filter", "lowercase"]
+        }
+      },
+      "filter": {
+        "lattice_filter": {
+          "type": "lattice",
+          "lattice_format": "audio",
+          "audio_position_increment_seconds": 0.1
+        }
+      }
+    }
+  },
+  "mappings": {
+    "dynamic": "strict",
+    "properties": {
+      "lattices": {
+        "type": "lattice",
+        "lattice_format": "audio",
+        "audio_position_increment_seconds": 0.1,
+        "analyzer": "lattice_analyzer"
+      }
+    }
+  }
+}
+
+POST audio_lattices/_doc/1
+{
+  "lattices": """the|0|0|0.9|0.15|0.25
+  quick|1|0|0.6|0.25|0.5 brick|1|1|0.2|0.25|0.5
+  fox|2|0|0.5|1.0|1.3 box|2|1|0.09|1.0|1.3
+  jumped|3|0|1.0|2.0|2.5"""
+}
+
+GET audio_lattices/_search
+{
+  "query": {
+    "match_lattice": {
+      "lattices": {
+      
+        "query": "quick box jumped",
+        "slop_seconds": 2,
+        "include_span_score": "true",
+        "payload_function": "sum",
+        "in_order": "true"
+      }
+    }
+  }
+}
+```
+
+Search Response
+
+```
+{
+  "took" : 1,
+  "timed_out" : false,
+  "_shards" : {
+    "total" : 1,
+    "successful" : 1,
+    "skipped" : 0,
+    "failed" : 0
+  },
+  "hits" : {
+    "total" : {
+      "value" : 1,
+      "relation" : "eq"
+    },
+    "max_score" : 36.987705,
+    "hits" : [
+      {
+        "_index" : "audio_lattices",
+        "_type" : "_doc",
+        "_id" : "1",
+        "_score" : 36.987705,
+        "_source" : {
+          "lattices" : """
+the|0|0|0.9|0.15|0.25
+  quick|1|0|0.6|0.25|0.5 brick|1|1|0.2|0.25|0.5
+  fox|2|0|0.5|1.0|1.3 box|2|1|0.09|1.0|1.3
+  jumped|3|0|1.0|2.0|2.5
+"""
+        }
+      }
+    ]
+  }
+}
+```
+
+### Usage with text transcripts with position, rank, and score only
+
+```
+{
+  "settings": {
+    "index": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "analysis": {
+      "analyzer": {
+        "lattice_analyzer": {
+          "type": "custom",
+          "tokenizer": "whitespace",
+          "filter": ["lattice_filter", "lowercase"]
+        }
+      },
+      "filter": {
+        "lattice_filter": {
+          "type": "lattice",
+          "lattice_format": "lattice"
+        }
+      }
+    }
+  },
+  "mappings": {
+    "dynamic": "strict",
+    "properties": {
+      "lattices": {
+        "type": "lattice",
+        "lattice_format": "lattice",
+        "analyzer": "lattice_analyzer"
+      }
+    }
+  }
+}
+
+POST text_lattices/_doc/1
+{
+  "lattices": """the|0|0|0.9
+  quick|1|0|0.6 brick|1|1|0.2
+  fox|2|0|0.5 box|2|1|0.09
+  jumped|3|0|1.0"""
+}
+
+GET text_lattices/_search
+{
+  "query": {
+    "match_lattice": {
+      "lattices": {
+      
+        "query": "quick jumped",
+        "slop": 1,
+        "include_span_score": "true",
+        "payload_function": "sum",
+        "in_order": "true"
+      }
+    }
+  }
+}
+```
+
+Search Response
+
+```
+{
+  "took" : 0,
+  "timed_out" : false,
+  "_shards" : {
+    "total" : 1,
+    "successful" : 1,
+    "skipped" : 0,
+    "failed" : 0
+  },
+  "hits" : {
+    "total" : {
+      "value" : 1,
+      "relation" : "eq"
+    },
+    "max_score" : 9041.438,
+    "hits" : [
+      {
+        "_index" : "text_lattices",
+        "_type" : "_doc",
+        "_id" : "1",
+        "_score" : 9041.438,
+        "_source" : {
+          "lattices" : """
+the|0|0|0.9
+  quick|1|0|0.6 brick|1|1|0.2
+  fox|2|0|0.5 box|2|1|0.09
+  jumped|3|0|1.0
+"""
+        }
+      }
+    ]
+  }
+}
+```
