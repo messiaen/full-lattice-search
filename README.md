@@ -13,7 +13,7 @@ In the case of STT the locations would be time ranges, in the case of OCR the lo
 coordinates, or perhaps a reading order location.  Each possible output has an associated probability of occurrence at
 that location allowing relevance scoring to be affected by the quality of the lattice output.
 
-![Location aligned lattice example](/doc/open_fst_lattice_example.svg)
+![Location aligned lattice example](/doc/fst_examples/title_example.png)
 
 ## Plugin
 
