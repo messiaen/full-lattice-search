@@ -20,7 +20,13 @@ package com.eigendomain.eslatticeindex.index.query;
 import org.apache.lucene.search.Explanation;
 import org.apache.lucene.search.spans.Spans;
 
-public abstract class LatticePayloadScoreFuction {
+public abstract class LatticePayloadScoreFunction {
+    private final float lenNormFactor;
+
+    public LatticePayloadScoreFunction(float lengthNormalizationFactor) {
+        this.lenNormFactor = lengthNormalizationFactor;
+    }
+
     /**
      * Calculate the score up to this point for this doc and field
      * @param docId The current doc
@@ -68,6 +74,10 @@ public abstract class LatticePayloadScoreFuction {
         return Explanation.match(
                 docScore(docId, field, numSpansSeen, payloadScore),
                 getClass().getSimpleName() + ".docScore()");
+    }
+
+    public float lengthNormalizationFactor() {
+        return lenNormFactor;
     }
 
     @Override

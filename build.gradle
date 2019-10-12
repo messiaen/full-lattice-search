@@ -76,4 +76,4 @@ esplugin {
 }
 
 test.enabled = true
-integTest.enabled = false
+integTest.enabled = true

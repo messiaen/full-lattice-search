@@ -16,14 +16,21 @@ package com.eigendomain.eslatticeindex.plugin;
 
 
 import com.eigendomain.eslatticeindex.index.LatticeTokenFilterFactory;
-import com.eigendomain.eslatticeindex.index.query.LatticeQueryBuilder;
+//import com.eigendomain.eslatticeindex.index.LatticeWhiteSpaceTokenizerFactory;
+import com.eigendomain.eslatticeindex.index.LatticeWhiteSpaceTokenizerFactory;
+import com.eigendomain.eslatticeindex.index.query.MatchLatticeQueryBuilder;
+import com.eigendomain.eslatticeindex.mapper.LatticeFieldMapper;
 import org.elasticsearch.index.analysis.TokenFilterFactory;
+//import org.elasticsearch.index.analysis.TokenizerFactory;
+import org.elasticsearch.index.analysis.TokenizerFactory;
+import org.elasticsearch.index.mapper.Mapper;
 import org.elasticsearch.indices.analysis.AnalysisModule.AnalysisProvider;
 import org.elasticsearch.plugins.AnalysisPlugin;
 import org.elasticsearch.plugins.MapperPlugin;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.plugins.SearchPlugin;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -39,13 +46,26 @@ public class LatticeIndexPlugin extends Plugin implements AnalysisPlugin, Search
         }};
     }
 
+
     @Override
     public List<QuerySpec<?>> getQueries() {
         return singletonList(
                 new QuerySpec<>(
                         "match_lattice",
-                        LatticeQueryBuilder::new,
-                        LatticeQueryBuilder::fromXContent)
+                        MatchLatticeQueryBuilder::new,
+                        MatchLatticeQueryBuilder::fromXContent)
         );
+    }
+
+    @Override
+    public Map<String, Mapper.TypeParser> getMappers() {
+        return Collections.singletonMap(LatticeFieldMapper.CONTENT_TYPE, new LatticeFieldMapper.TypeParser());
+    }
+
+    // TODO This exists only so that we can use a whitespace tokenizer in itests.  Apparently  the
+    //   analysis-common module is not accessible during the rest-api-spec tests?
+    @Override
+    public Map<String, AnalysisProvider<TokenizerFactory>> getTokenizers() {
+        return Collections.singletonMap("lattice_whitespace", LatticeWhiteSpaceTokenizerFactory::new);
     }
 }

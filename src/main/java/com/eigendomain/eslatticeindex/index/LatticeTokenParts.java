@@ -31,10 +31,15 @@ abstract class LatticeTokenParts<T extends LatticeTokenParts<T>> {
     private int tokenLen;
     private BytesRef encodedScore;
     private Float score;
+    private String token;
 
     LatticeTokenParts(char fieldDelimiter) {
         this.fieldDelimiter = fieldDelimiter;
         this.reset();
+    }
+
+    public String token() {
+        return token;
     }
 
     public char delimiter() {
@@ -72,7 +77,12 @@ abstract class LatticeTokenParts<T extends LatticeTokenParts<T>> {
         return 1;
     }
 
+    public int firstTokenIncrement() {
+        return 1;
+    }
+
     protected boolean parseFields(char[] token, int len, int[] delimiterLocs) {
+        this.token = getToken(token, delimiterLocs);
         this.tokenLen = getTokenLen(delimiterLocs);
         this.pos = parseInteger(token, len, delimiterLocs, 1);
         this.rank = parseInteger(token, len, delimiterLocs, 2);
@@ -91,6 +101,10 @@ abstract class LatticeTokenParts<T extends LatticeTokenParts<T>> {
 
     protected static int getTokenLen(int[] delimiterLocs) {
         return delimiterLocs[0];
+    }
+
+    protected static String getToken(char[] token, int[] delimiterLocs) {
+        return String.copyValueOf(token, 0, delimiterLocs[0]);
     }
 
     protected static int parseInteger(char[] token, int len, int[] delimiterLocs, int fieldNum) {

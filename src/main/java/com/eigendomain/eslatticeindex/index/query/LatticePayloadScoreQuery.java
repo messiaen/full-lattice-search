@@ -52,7 +52,7 @@ import org.apache.lucene.util.BytesRef;
 public class LatticePayloadScoreQuery extends SpanQuery {
 
     private final SpanQuery wrappedQuery;
-    private final LatticePayloadScoreFuction function;
+    private final LatticePayloadScoreFunction function;
     private final PayloadDecoder decoder;
     private final boolean includeSpanScore;
 
@@ -63,7 +63,7 @@ public class LatticePayloadScoreQuery extends SpanQuery {
      * @param decoder a PayloadDecoder to convert payloads into float values
      * @param includeSpanScore include both span score and payload score in the scoring algorithm
      */
-    public LatticePayloadScoreQuery(SpanQuery wrappedQuery, LatticePayloadScoreFuction function,
+    public LatticePayloadScoreQuery(SpanQuery wrappedQuery, LatticePayloadScoreFunction function,
                                     PayloadDecoder decoder, boolean includeSpanScore) {
         this.wrappedQuery = Objects.requireNonNull(wrappedQuery);
         this.function = Objects.requireNonNull(function);
@@ -77,7 +77,7 @@ public class LatticePayloadScoreQuery extends SpanQuery {
      * @param function a PayloadFunction to use to modify the scores
      * @param decoder a PayloadDecoder to use to decode each payload
      */
-    public LatticePayloadScoreQuery(SpanQuery wrappedQuery, LatticePayloadScoreFuction function,
+    public LatticePayloadScoreQuery(SpanQuery wrappedQuery, LatticePayloadScoreFunction function,
                                     PayloadDecoder decoder) {
         this(wrappedQuery, function, decoder, true);
     }
