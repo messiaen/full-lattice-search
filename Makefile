@@ -19,6 +19,8 @@ build_image: build
 
 push:
 	docker push $(NAME):$(IMAGE_VERSION)
+
+push_latest:
 	docker push $(NAME):latest
 
 test:
