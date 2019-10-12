@@ -52,6 +52,18 @@ import java.util.Map;
 
 import static org.elasticsearch.index.mapper.TypeParsers.parseTextField;
 
+/*
+TODO This really should't be necessary.:
+ The requirement is to be able to access analyzer configuration at query time, as it affects the formation of the query.
+ This is possible if we were to define a custom analyzer, but then we could not customize the filter chain in index
+ mappings. It might be possible to see / customize the filter chain. In the same way
+ TokenFilterFactory.getChainAwareTokenFilterFactory() exposes configured filters, a similar method could be added and
+ used in AnalyzerProvider to provide analyzers access to configured filters.
+ Since the query also does not have access to the configured filters or how they are configured, but only to the
+ analyzer, we have to rely on the FieldType to have the information we need.
+ Consequently, we must manually sync the configuration of the LatticeTokenFilter and LatticeFieldMapper in index
+ mappings.
+ */
 public class LatticeFieldMapper extends FieldMapper {
 
     public static final String CONTENT_TYPE = "lattice";

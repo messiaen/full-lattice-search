@@ -15,11 +15,15 @@
 package com.eigendomain.eslatticeindex.index;
 
 import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.core.WhitespaceTokenizer;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.env.Environment;
 import org.elasticsearch.index.IndexSettings;
 import org.elasticsearch.index.analysis.AbstractTokenizerFactory;
 
+/*
+This exists so that we can use the whitespace tokenizer in integration tests
+ */
 public class LatticeWhiteSpaceTokenizerFactory extends AbstractTokenizerFactory {
 
     public LatticeWhiteSpaceTokenizerFactory(IndexSettings indexSettings, Environment environment, String s, Settings settings) {
@@ -28,6 +32,6 @@ public class LatticeWhiteSpaceTokenizerFactory extends AbstractTokenizerFactory 
 
     @Override
     public Tokenizer create() {
-        return new LatticeWhitespaceTokenizer();
+        return new WhitespaceTokenizer();
     }
 }
