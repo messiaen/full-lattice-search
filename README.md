@@ -130,7 +130,17 @@ Parameters include:
   
 ## Getting Started
 
-### Development with [docker-compose](https://docs.docker.com/compose/)
+### Development 
+
+#### [Docker](https://www.docker.com)
+
+For development you can use the docker image below, which simply takes from official Elasticsearch image and installs
+this plugin.  You can read [this](https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html) for
+instructions on how to use the Elasticsearch images.
+
+`docker pull messiaen/full-lattice-search:2.0.0-rc3-7.3.0`
+
+#### [docker-compose](https://docs.docker.com/compose/)
 
 `docker-compose.yaml` example:
 
@@ -144,7 +154,7 @@ services:
     environment:
       ELASTICSEARCH_HOSTS: http://es01:9200
   es01:
-    image: messiaen/full-lattice-search:2.0.0-rc2-7.3.0
+    image: messiaen/full-lattice-search:2.0.0-rc3-7.3.0
     environment:
       - node.name=es01
       - discovery.type=single-node
@@ -163,8 +173,12 @@ volumes:
     driver: local
 ```
 
+Simply copy the yaml above into a file named docker-compose.yaml, and from that directory run `docker-compose up`
  
 ## Example Usage with [Kibana](https://www.elastic.co/guide/en/kibana/current/index.html)
+
+Assuming you are using the `docker-compose.yaml` above navigate to `localhost:5601` in your browser and paste the 
+following examples into Kibana's Dev Tools console.
 
 ### Usage with audio transcripts with times
 
@@ -272,6 +286,7 @@ the|0|0|0.9|0.15|0.25
 ### Usage with text transcripts with position, rank, and score only
 
 ```
+PUT text_lattices
 {
   "settings": {
     "index": {
