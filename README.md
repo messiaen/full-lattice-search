@@ -1,17 +1,13 @@
 # Full Lattice Search
 
-## Full Text Search Over Probabilistic Lattices
+## Full Text Search Over Probabilistic Lattices with [Elasticsearch](https://github.com/elastic/elasticsearch)!
 
-### Like this one!
-
-![Location aligned lattice example](/doc/fst_examples/title_example.png)
-
-### With [Elasticsearch](https://github.com/elastic/elasticsearch)!!
+![Location aligned lattice example](doc/fst_examples/title_example.png)
 
 ## Overview
 
-This [Elasticsearch](https://github.com/elastic/elasticsearch) plugin enables search across probabilistic
-lattice structures.  These lattices are in the form output by
+This [Elasticsearch](https://github.com/elastic/elasticsearch) plugin enables search across transcripts in the form of
+probabilistic lattice structures.  These lattices are in the form output by
 Automated Speech Recognition
 (ASR) or Speech-to-text (STT), Optical Character recognition (OCR), Machine Translation (MT), Automated Image Captioning,
 etc.  The lattices, regardless of the analytic, can be viewed as the Finite State Machine (FST) structure below, 
@@ -35,7 +31,9 @@ The plugin consists of three components:
   with [LatticeTokenFilter](#LatticeTokenFilter)
 
 ### LatticeTokenFilter
-A token filter of type `lattice` that processes a lattice token stream.
+A token filter of type `lattice` that processes a lattice token stream.  Tokens in the stream indicate the token 
+position, allowing the stream to represent a lattice structure like the one above.  Tokens in the stream also have a
+score, which is stored in the token payload when indexed so that is can be used to affect scoring.
 
 Accepts tokens in one of two forms (see `lattice_format` parameter)
 
@@ -46,7 +44,7 @@ Tokens should be in the form
 
 Example stream: `the|0|0|0.9`,  `quick|1|0|0.6`, `brick|1|1|0.2`, `fox|2|0|0.5`, `box|2|1|0.09`, `jumped|3|0|1.0`
 
-![example1](/doc/fst_examples/example_01.png)
+![example1](doc/fst_examples/example_01.png)
 
 In the example above the tokens `quick` and `brick` will be index at the same location, because they both have position
 set to 1.
@@ -68,7 +66,7 @@ Tokens should be in the form
 
 Example stream: `the|0|0|0.9|0.15|0.25`,  `quick|1|0|0.6|0.25|0.5`, `brick|1|1|0.2|0.25|0.5`, `fox|2|0|0.5|1.0|1.3`, `box|2|1|0.09|1.0|1.3`, `jumped|3|0|1.0|2.0|2.5`
 
-![example2](/doc/fst_examples/example_02.png)
+![example2](doc/fst_examples/example_02.png)
 
 In the example above the tokens `quick` and `brick` will be index at the same location, because they both have position
 set to 1.  The actual position of the tokens is determined by the times and `audio_position_increment_seconds`.
@@ -379,3 +377,59 @@ Requires [Elasticsearch 7.3.0](https://www.elastic.co/guide/en/elasticsearch/ref
 1. Download the appropriate release from [releases tab](https://github.com/messiaen/full-lattice-search/releases)
 2. Install the plugin using the Elasticsearch docs [here](https://www.elastic.co/guide/en/elasticsearch/plugins/7.4/plugin-management-custom-url.html)
   or [here](https://www.elastic.co/guide/en/elasticsearch/plugins/7.4/_plugins_directory.html)
+  
+## Limitations
+
+### Sausages
+
+![sassage flare](doc/adventure_time_sassage_flare.png)
+
+This plugin is not designed to work with generalized lattice structures, but to work with a compressed form known as a 
+confusion network, or *sausage string*. A confusion 
+network represents a generalized lattice with a fixed set of positions (time ranges, image locations, etc).  
+Each position has a set of possible words, and each word has an associated likelihood of occurrence.  
+
+For example an Automated Speech Recognizer could generate the lattice below where the speaker really said
+
+*"Each video should be under ten minutes"*
+
+![lattice eg](doc/fst_examples/lattice_example.png)
+
+The lattice above can be compressed into the confusion network below.
+
+![sausage eg](doc/fst_examples/sausage_examples.png)
+
+Note the `<epsilon>` tokens (meaning the absence of a word) have been inserted to allow for the word "understand' 
+to have a longer duration than others.
+
+It is also worth noting that the process of compressing a lattice into a confusion network is generally lossy, 
+meaning that some paths through a confusion network are not present in the source lattice.  For example, the phrase
+*"be understand ten minutes"* is present in the confusion network, but not in the lattice.
+
+**Note you are responsible for ensuring your lattice structures are formatted a confusion networks.**
+
+### Use of `score_buckets`
+
+See [LatticeTokenFilter docs](#LatticeTokenFilter) for usage details.
+
+As mentioned in the [LatticeTokenFilter docs](#LatticeTokenFilter), the `score_buckets` parameter may be used to index
+duplicate tokens at the same position in order to boost the term-frequency of those tokens relative to there score.
+Although this does have the desired affect, there few considerations.
+1. **Index size:** Duplicating will increase the size of your indices, relative to how many duplicates you use.  This
+  is somewhat in conflict with retrieval performance.  During testing of this technique for an ASR system it was found
+  that a `8x` linear duplication of tokens
+  (`score_buckets=[0.9, 72, 0.8, 64, 0.7, 56, 0.6, 48, 0.5, 40, 0.4, 32, 0.2, 16, 0.1, 8, 0.01, 2]`) performed much
+  better than configurations with less duplication.
+2. **Index speed**: too much duplication can lead to *very* slow index speeds, particularly if heavier follow-on Token Filters are
+  used such the 
+  [Phonetic Token Filter](https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-phonetic-tokenfilter.html),
+  or some of the 
+  [Stemmer Token Filters](https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-stemmer-tokenfilter.html#analysis-stemmer-tokenfilter)
+  During testing of indexing with the `8x` duplication configuration in 1, removing the phonetic token filter from the
+  analysis stream resulted in a 5x speedup in indexing.
+3. **term-frequency hack:** Because we are hacking the term-frequency stats to affect relevance scoring, one
+  possibility is that
+  lattices will contain lots of low scoring instances of a single word.  In this case the 
+  term-frequency for that word could be very high, and therefore look like a high quality match, when in fact it is
+  not.  To help this documents should be kept small (lattice can be broken into segments). In general use of this hack /
+  oversimplification requires careful testing for your specific use case.
