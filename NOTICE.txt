@@ -1,4 +1,4 @@
-Copyright 2019 Greg Clark, full-text-search team
+Copyright 2019 Greg Clark, full-lattice-search team
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
