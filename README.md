@@ -161,7 +161,7 @@ For development you can use the docker image below, which simply takes from offi
 this plugin.  You can read [this](https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html) for
 instructions on how to use the Elasticsearch images.
 
-`docker pull messiaen/full-lattice-search:2.0.0-rc3-7.3.0`
+`docker pull messiaen/full-lattice-search:2.0.0-7.3.0`
 
 #### [docker-compose](https://docs.docker.com/compose/)
 
@@ -177,7 +177,7 @@ services:
     environment:
       ELASTICSEARCH_HOSTS: http://es01:9200
   es01:
-    image: messiaen/full-lattice-search:2.0.0-rc3-7.3.0
+    image: messiaen/full-lattice-search:2.0.0-7.3.0
     environment:
       - node.name=es01
       - discovery.type=single-node
@@ -267,7 +267,7 @@ GET audio_lattices/_search
   }
 }
 ```
-[View in console](http://localhost:5601/app/kibana#/dev_tools/console?load_from=https://raw.githubusercontent.com/messiaen/full-lattice-search/2-docs/doc/kibana_snippets/audio_lattices_snippet.console)
+[View in console](http://localhost:5601/app/kibana#/dev_tools/console?load_from=https://raw.githubusercontent.com/messiaen/full-lattice-search/master/doc/kibana_snippets/audio_lattices_snippet.console)
 
 Search Response
 
@@ -369,7 +369,7 @@ GET text_lattices/_search
   }
 }
 ```
-[View in console](http://localhost:5601/app/kibana#/dev_tools/console?load_from=https://raw.githubusercontent.com/messiaen/full-lattice-search/2-docs/doc/kibana_snippets/text_lattices_snippet.console)
+[View in console](http://localhost:5601/app/kibana#/dev_tools/console?load_from=https://raw.githubusercontent.com/messiaen/full-lattice-search/master/doc/kibana_snippets/text_lattices_snippet.console)
 
 Search Response
 
