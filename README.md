@@ -429,6 +429,11 @@ If you wish to only build the plugin without running tests you can run
 
 In either case, the built plugin will be `build/distributions/full-lattice-search-*.zip`
 
+### Testing
+
+`make run` will build the plugin and stand up an Elasticsearch (with the plugin installed) and a Kibana with 
+docker-compose
+
 ## Installation for Production
 
 Requires [Elasticsearch 7.3.0](https://www.elastic.co/guide/en/elasticsearch/reference/7.3/install-elasticsearch.html)
