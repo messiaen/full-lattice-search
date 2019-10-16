@@ -1,0 +1,60 @@
+PUT audio_lattices
+{
+  "settings": {
+    "index": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "analysis": {
+      "analyzer": {
+        "lattice_analyzer": {
+          "type": "custom",
+          "tokenizer": "whitespace",
+          "filter": ["lattice_filter", "lowercase"]
+        }
+      },
+      "filter": {
+        "lattice_filter": {
+          "type": "lattice",
+          "lattice_format": "audio",
+          "audio_position_increment_seconds": 0.1
+        }
+      }
+    }
+  },
+  "mappings": {
+    "dynamic": "strict",
+    "properties": {
+      "lattices": {
+        "type": "lattice",
+        "lattice_format": "audio",
+        "audio_position_increment_seconds": 0.1,
+        "analyzer": "lattice_analyzer"
+      }
+    }
+  }
+}
+
+POST audio_lattices/_doc/1
+{
+  "lattices": """the|0|0|0.9|0.15|0.25
+  quick|1|0|0.6|0.25|0.5 brick|1|1|0.2|0.25|0.5
+  fox|2|0|0.5|1.0|1.3 box|2|1|0.09|1.0|1.3
+  jumped|3|0|1.0|2.0|2.5"""
+}
+
+GET audio_lattices/_search
+{
+  "query": {
+    "match_lattice": {
+      "lattices": {
+
+        "query": "quick box jumped",
+        "slop_seconds": 2,
+        "include_span_score": "true",
+        "payload_function": "sum",
+        "in_order": "true"
+      }
+    }
+  }
+}

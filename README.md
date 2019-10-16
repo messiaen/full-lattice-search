@@ -267,6 +267,7 @@ GET audio_lattices/_search
   }
 }
 ```
+[View in console](http://localhost:5601/app/kibana#/dev_tools/console?load_from=https://github.com/messiaen/full-lattice-search/blob/2-docs/doc/kibana_snippets/audio_lattices_snippet.console)
 
 Search Response
 
@@ -368,6 +369,7 @@ GET text_lattices/_search
   }
 }
 ```
+[View in console](http://localhost:5601/app/kibana#/dev_tools/console?load_from=https://github.com/messiaen/full-lattice-search/blob/2-docs/doc/kibana_snippets/text_lattices_snippet.console)
 
 Search Response
 
@@ -406,6 +408,26 @@ the|0|0|0.9
   }
 }
 ```
+
+## Build from source
+
+### Build Requirements 
+
+- make
+- java7 - java12
+  - To run tests with the elasticsearch.esplugin gradle plugin you'll need to install each jdk and set `JAVA_HOME`
+    environment variables for each.  (e.g. `JAVA7_HOME`, `JAVA8_HOME` ... , `JAVA11_HOME`) `JAVA_HOME` should point to
+    jdk12.
+    
+### Build and Test
+
+Simply run `make` in the root directory
+
+If you wish to only build the plugin without running tests you can run 
+
+`./gradlew clean assemble`
+
+In either case, the built plugin will be `build/distributions/full-lattice-search-*.zip`
 
 ## Installation for Production
 
