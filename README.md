@@ -267,7 +267,7 @@ GET audio_lattices/_search
   }
 }
 ```
-[View in console](http://localhost:5601/app/kibana#/dev_tools/console?load_from=https://github.com/messiaen/full-lattice-search/blob/2-docs/doc/kibana_snippets/audio_lattices_snippet.console)
+[View in console](http://localhost:5601/app/kibana#/dev_tools/console?load_from=https://raw.githubusercontent.com/messiaen/full-lattice-search/2-docs/doc/kibana_snippets/audio_lattices_snippet.console)
 
 Search Response
 
@@ -369,7 +369,7 @@ GET text_lattices/_search
   }
 }
 ```
-[View in console](http://localhost:5601/app/kibana#/dev_tools/console?load_from=https://github.com/messiaen/full-lattice-search/blob/2-docs/doc/kibana_snippets/text_lattices_snippet.console)
+[View in console](http://localhost:5601/app/kibana#/dev_tools/console?load_from=https://raw.githubusercontent.com/messiaen/full-lattice-search/2-docs/doc/kibana_snippets/text_lattices_snippet.console)
 
 Search Response
 
