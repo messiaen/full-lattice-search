@@ -414,11 +414,8 @@ the|0|0|0.9
 ### Build Requirements 
 
 - make
-- java7 - java12
-  - To run tests with the elasticsearch.esplugin gradle plugin you'll need to install each jdk and set `JAVA_HOME`
-    environment variables for each.  (e.g. `JAVA7_HOME`, `JAVA8_HOME` ... , `JAVA11_HOME`) `JAVA_HOME` should point to
-    jdk12.
-    
+- java12
+
 ### Build and Test
 
 Simply run `make` in the root directory
