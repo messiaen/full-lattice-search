@@ -4,6 +4,8 @@
 
 ![Location aligned lattice example](doc/fst_examples/title_example.png)
 
+[![Build Status](https://travis-ci.com/messiaen/full-lattice-search.svg?branch=master)](https://travis-ci.com/messiaen/full-lattice-search)
+
 ## Overview
 
 This [Elasticsearch](https://github.com/elastic/elasticsearch) plugin enables search across transcripts in the form of
