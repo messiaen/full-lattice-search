@@ -41,6 +41,17 @@ public class SumLatticePayloadFunctionTests extends ESTestCase {
         Assert.assertEquals(expected, actual, 2);
     }
 
+    public void testSpanScoreLenNormZero() {
+        LatticePayloadScoreFunction function = new SumLatticePayloadFunction(0.0f);
+        int start = 1;
+        int end = 3;
+        float currentScore = 0;
+
+        float expected = 3000.0f;
+        float actual = function.spanScore(0, "", start, end, 0, 0, 0, -3.506f);
+        Assert.assertEquals(expected, actual, 2);
+    }
+
     public void testCurrentLeafScore() {
         LatticePayloadScoreFunction function = new SumLatticePayloadFunction(1.0f);
         int start = 1;

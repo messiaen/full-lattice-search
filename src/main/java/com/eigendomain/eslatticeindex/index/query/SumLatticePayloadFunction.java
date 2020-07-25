@@ -31,9 +31,13 @@ public class SumLatticePayloadFunction extends LatticePayloadScoreFunction {
                            float currentScore, float currentSpanScore) {
         // the scores are normalized by the length of the span
         // this incorporates that number of tokens in the query plus the number of skipped tokens
-        return currentScore
-                + (float)Math.exp(
-                        (SCORE_MULT + currentSpanScore) - Math.log((end - start) * lengthNormalizationFactor()));
+        if (lengthNormalizationFactor() == 0.0) {
+            return currentScore + (float) Math.exp(SCORE_MULT + currentSpanScore);
+        } else {
+            return currentScore
+                    + (float) Math.exp(
+                    (SCORE_MULT + currentSpanScore) - Math.log((end - start) * lengthNormalizationFactor()));
+        }
     }
 
     @Override
