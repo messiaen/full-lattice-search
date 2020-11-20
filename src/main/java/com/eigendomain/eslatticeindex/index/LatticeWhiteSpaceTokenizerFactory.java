@@ -27,7 +27,7 @@ This exists so that we can use the whitespace tokenizer in integration tests
 public class LatticeWhiteSpaceTokenizerFactory extends AbstractTokenizerFactory {
 
     public LatticeWhiteSpaceTokenizerFactory(IndexSettings indexSettings, Environment environment, String s, Settings settings) {
-        super(indexSettings, settings);
+        super(indexSettings, settings, "lattice_whitespace");
     }
 
     @Override

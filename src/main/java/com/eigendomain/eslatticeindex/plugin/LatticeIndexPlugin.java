@@ -19,7 +19,7 @@ import com.eigendomain.eslatticeindex.index.LatticeTokenFilterFactory;
 //import com.eigendomain.eslatticeindex.index.LatticeWhiteSpaceTokenizerFactory;
 import com.eigendomain.eslatticeindex.index.LatticeWhiteSpaceTokenizerFactory;
 import com.eigendomain.eslatticeindex.index.query.MatchLatticeQueryBuilder;
-import com.eigendomain.eslatticeindex.mapper.LatticeFieldMapper;
+import org.elasticsearch.index.mapper.LatticeFieldMapper;
 import org.elasticsearch.index.analysis.TokenFilterFactory;
 //import org.elasticsearch.index.analysis.TokenizerFactory;
 import org.elasticsearch.index.analysis.TokenizerFactory;

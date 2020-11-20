@@ -14,7 +14,7 @@
 
 package com.eigendomain.eslatticeindex.index;
 
-import com.eigendomain.eslatticeindex.mapper.LatticeFieldMapper;
+import org.elasticsearch.index.mapper.LatticeFieldMapper;
 import org.apache.lucene.analysis.TokenStream;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.env.Environment;

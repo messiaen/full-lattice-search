@@ -27,10 +27,10 @@ import org.apache.lucene.search.PointRangeQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 import org.elasticsearch.common.ParsingException;
+import org.elasticsearch.index.query.QueryShardContext;
 import org.elasticsearch.index.query.QueryShardException;
 import org.elasticsearch.index.search.MatchQuery;
 import org.elasticsearch.plugins.Plugin;
-import org.elasticsearch.search.internal.SearchContext;
 import org.elasticsearch.test.AbstractQueryTestCase;
 import org.hamcrest.CoreMatchers;
 
@@ -50,7 +50,7 @@ public class MatchLatticeQueryBuilderTests extends AbstractQueryTestCase<MatchLa
 
     @Override
     protected MatchLatticeQueryBuilder doCreateTestQueryBuilder() {
-        String fieldName = randomFrom(STRING_FIELD_NAME, STRING_ALIAS_FIELD_NAME, BOOLEAN_FIELD_NAME, INT_FIELD_NAME,
+        String fieldName = randomFrom(TEXT_FIELD_NAME, TEXT_ALIAS_FIELD_NAME, BOOLEAN_FIELD_NAME, INT_FIELD_NAME,
                 DOUBLE_FIELD_NAME, DATE_FIELD_NAME);
         Object value;
         if (isTextField(fieldName)) {
@@ -94,7 +94,7 @@ public class MatchLatticeQueryBuilderTests extends AbstractQueryTestCase<MatchLa
     }
 
     @Override
-    protected void doAssertLuceneQuery(MatchLatticeQueryBuilder queryBuilder, Query query, SearchContext context) throws IOException {
+    protected void doAssertLuceneQuery(MatchLatticeQueryBuilder queryBuilder, Query query, QueryShardContext context) throws IOException {
         assertThat(query, notNullValue());
 
         if (query instanceof MatchAllDocsQuery) {
