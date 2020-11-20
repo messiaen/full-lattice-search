@@ -17,7 +17,7 @@
 
 package com.eigendomain.eslatticeindex.mapper;
 
-import com.eigendomain.eslatticeindex.mapper.LatticeFieldMapper.LatticeFieldType;
+import org.elasticsearch.index.mapper.LatticeFieldMapper.LatticeFieldType;
 import com.eigendomain.eslatticeindex.plugin.LatticeIndexPlugin;
 import org.apache.lucene.index.DocValuesType;
 import org.apache.lucene.index.IndexOptions;

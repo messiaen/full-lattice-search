@@ -72,8 +72,14 @@ esplugin {
 
   dependencies {
     testCompile group: 'org.elasticsearch.test', name: 'framework', version: "${elasticsearchVersion}"
+    testRuntime group: 'org.locationtech.jts', name: 'jts-core', version: '1.15.0'
+    testRuntime group: 'org.locationtech.spatial4j', name: 'spatial4j', version: '0.7'
  }
 }
 
 test.enabled = true
 integTest.enabled = true
+licenseHeaders.enabled = true;
+validateNebulaPom.enabled = true;
+forbiddenPatterns.enabled = true;
+testingConventions.enabled = true;
